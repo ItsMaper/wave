@@ -1,13 +1,13 @@
-package com.coffenow.wave.ui.dashboard
+package com.coffenow.wave.ui.user
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
-class DashboardViewModel : ViewModel() {
+class UserViewModel : ViewModel() {
 
     private val _text = MutableLiveData<String>().apply {
-        value = "This is dashboard Fragment"
+        value = "This is user Fragment"
     }
     val text: LiveData<String> = _text
 }
