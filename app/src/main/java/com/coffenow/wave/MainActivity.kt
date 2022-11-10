@@ -1,6 +1,10 @@
 package com.coffenow.wave
 
 import android.os.Bundle
+import android.text.Editable
+import android.view.Menu
+import android.view.MenuItem
+import android.widget.EditText
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
@@ -35,4 +39,12 @@ class MainActivity : AppCompatActivity() {
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
     }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.search_menu, menu)
+            return true
+    }
+
+
+
 }

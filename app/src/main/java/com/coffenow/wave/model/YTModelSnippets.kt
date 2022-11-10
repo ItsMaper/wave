@@ -1,26 +1,23 @@
-package com.coffenow.wave.ymodel
+package com.coffenow.wave.model
 
 import androidx.annotation.Keep
 import com.google.gson.annotations.SerializedName
 
-
 @Keep
-data class SnippetYT (
+data class YTModelSnippets(
     @SerializedName("title")
     val title: String,
 
     @SerializedName("description")
-    val description:String,
+    val description: String,
 
     @SerializedName("customUrl")
     val customUrl: String,
 
     @SerializedName("publishedAt")
-    val publishedAt:String,
+    val publishedAt: String,
 
     @SerializedName("thumbnails")
-    val thumbnails: ThumbnailsYT,
+    val thumbnails: YTModelThumbnails,
 
-    @SerializedName("country")
-    val country:String
-        )
+)
