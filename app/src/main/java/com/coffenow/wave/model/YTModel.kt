@@ -6,15 +6,20 @@ import com.google.gson.annotations.SerializedName
 @Keep
 data class YTModel(
     @SerializedName("nextPageToken")
-    val nextPageToken: String,
+    val nextPageToken: String?,
     @SerializedName("items")
     val items: List<Items>
-
 ) {
     data class Items(
+        @SerializedName("id")
+        val videoId: VideoId,
         @SerializedName("snippet")
         val snippet: YTModelSnippets,
         @SerializedName("q")
         val q: String
+    )
+    data class VideoId(
+        @SerializedName("videoID")
+        val id: String
     )
 }

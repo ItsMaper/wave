@@ -1,16 +1,14 @@
-package com.coffenow.wave
+package com.coffenow.wave.activities
 
 import android.os.Bundle
-import android.text.Editable
 import android.view.Menu
-import android.view.MenuItem
-import android.widget.EditText
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import com.coffenow.wave.R
 import com.coffenow.wave.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {

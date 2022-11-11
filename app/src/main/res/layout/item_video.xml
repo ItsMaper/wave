@@ -29,10 +29,11 @@
         tools:text="@tools:sample/full_names" />
 
     <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/tv_published"
+        android:id="@+id/tv_publisher"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
+        android:layout_marginBottom="8dp"
         android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
         android:textColor="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"

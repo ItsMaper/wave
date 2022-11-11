@@ -1,30 +1,37 @@
 package com.coffenow.wave.adapter
 
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.coffenow.wave.activities.PlayerActivity
 import com.coffenow.wave.databinding.ItemVideoBinding
 import com.coffenow.wave.diffutils.VideoDiffUtil
 import com.coffenow.wave.model.YTModel
 
-
 class VideoAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    private var oldItems = emptyList<YTModel.Items>()
+    private var oldItems =  ArrayList<YTModel.Items>()
 
     class VideoHolder(itemView: ItemVideoBinding) : RecyclerView.ViewHolder(itemView.root){
         private val binding = itemView
 
         fun setData(data: YTModel.Items){
+            binding.root.setOnClickListener {
+                val i = Intent(it.context, PlayerActivity::class.java)
+                i.putExtra("video_img", data.snippet.thumbnails.high.url)
+                i.putExtra("video_title", data.snippet.title)
+                i.putExtra("video_description", data.snippet.description)
+                it.context.startActivity(i)
+            }
             binding.tvVideoTitle.text = data.snippet.title
+            binding.tvPublisher.text = data.snippet.description
             Glide.with(binding.root)
                 .load(data.snippet.thumbnails.high.url)
                 .into(binding.tvThumbnail)
         }
-
-
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -40,11 +47,13 @@ class VideoAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         return oldItems.size
     }
 
-    fun setData(newList: List<YTModel.Items>){
+    fun setData(newList: List<YTModel.Items>, rv: RecyclerView){
         val videoDiff = VideoDiffUtil(oldItems, newList)
         val diff = DiffUtil.calculateDiff(videoDiff)
-        oldItems = newList
+        oldItems.addAll(newList)
         diff.dispatchUpdatesTo(this)
+        rv.scrollToPosition(oldItems.size - newList.size)
     }
 
 }
+

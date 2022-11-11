@@ -9,9 +9,11 @@ import retrofit2.http.Query
 interface ApiServices {
 
     @GET("search")
-    fun getChannel(
+    fun getVideo(
         @Query("part") part: String,
-        @Query("q") id: String
+        @Query("q") id: String,
+        @Query("order") order: String,
+        @Query("pageToken") pageToken: String?
     ) : Call<YTModel>
 
 }
