@@ -1,19 +1,24 @@
 package com.coffenow.wave.ui.home
 
+import android.app.SearchManager
+import android.content.Context
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.AbsListView
 import android.widget.Toast
+import android.widget.Toolbar
+import androidx.appcompat.widget.SearchView
+import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.coffenow.wave.R
+import com.coffenow.wave.activities.MainActivity
 import com.coffenow.wave.adapter.VideoAdapter
 import com.coffenow.wave.databinding.FragmentHomeBinding
 
-class HomeFragment : Fragment() {
+class HomeFragment : Fragment(), MenuProvider {
 
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
@@ -28,7 +33,7 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        activity?.addMenuProvider(this)
         val manager = LinearLayoutManager(requireContext())
         binding.rvVideo.adapter = adapter
         binding.rvVideo.layoutManager = manager
@@ -59,18 +64,15 @@ class HomeFragment : Fragment() {
             }
 
         })
-
         videoViewModel?.video?.observe(viewLifecycleOwner) {
             if (it != null && it.items.isNotEmpty()) {
                 adapter.setData(it.items, binding.rvVideo)
             }
         }
-
         videoViewModel?.isLoading?.observe(viewLifecycleOwner) {
             isLoading = it
             binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
         }
-
         videoViewModel?.isAllVideoLoaded?.observe(viewLifecycleOwner) {
             isAllVideoLoaded = it
             if (it) Toast.makeText(
@@ -82,14 +84,55 @@ class HomeFragment : Fragment() {
 
     }
 
+
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
+
     ): View {
         videoViewModel =
             ViewModelProvider(this).get(HomeViewModel::class.java)
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         return binding.root
     }
-}
+
+
+    override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+        val searchManager = requireActivity().getSystemService(Context.SEARCH_SERVICE) as SearchManager
+        val searchView = menu.findItem(R.id.top_search_menu).actionView as SearchView
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(requireActivity().componentName))
+        searchView.queryHint = resources.getString(R.string.search_bar)
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(q: String): Boolean {
+                if (q.isNotEmpty()){
+                    videoViewModel?.querySearch = q
+                    videoViewModel?.nextPageToken = null
+                    adapter.clearAll()
+                    videoViewModel?.getVideoList()
+                }
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String): Boolean {
+                if (newText.isEmpty()){
+                    videoViewModel?.querySearch = null
+                    videoViewModel?.nextPageToken = null
+                    adapter.clearAll()
+                    videoViewModel?.getVideoList()
+                }
+                return false
+            }
+        })
+    }
+    override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+        TODO("Not yet implemented")
+    }
+    }
+

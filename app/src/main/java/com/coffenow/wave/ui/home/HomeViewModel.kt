@@ -19,7 +19,8 @@ class HomeViewModel : ViewModel() {
     val isAllVideoLoaded = _isAllVideoLoaded
     private val _message = MutableLiveData<String>()
     val message = _message
-    private var nextPageToken: String? = null
+    var nextPageToken: String? = null
+    var querySearch: String? = null
 
     init {
         getVideoList()
@@ -27,7 +28,13 @@ class HomeViewModel : ViewModel() {
 
     fun getVideoList(){
         _isLoading.value = true
-        val client = ApiConfig.getService().getVideo("snippet", "Musica Cristiana", "relevance", nextPageToken)
+        val client = ApiConfig
+            .getService()
+            .getVideo(
+                "snippet",
+                querySearch,
+                "relevance",
+                nextPageToken)
         client.enqueue(object : Callback<YTModel>{
             override fun onResponse(call: Call<YTModel>, response: Response<YTModel>) {
                 _isLoading.value = false

@@ -11,7 +11,7 @@ interface ApiServices {
     @GET("search")
     fun getVideo(
         @Query("part") part: String,
-        @Query("q") id: String,
+        @Query("q") query: String?,
         @Query("order") order: String,
         @Query("pageToken") pageToken: String?
     ) : Call<YTModel>

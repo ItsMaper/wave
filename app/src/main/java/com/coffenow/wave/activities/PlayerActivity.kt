@@ -12,9 +12,7 @@ class PlayerActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (supportActionBar != null) {
-            supportActionBar!!.hide()
-        }
+
         _binding = ActivityPlayerBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
