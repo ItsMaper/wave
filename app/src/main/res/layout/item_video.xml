@@ -8,10 +8,10 @@
 
     <ImageView
         android:id="@+id/tv_thumbnail"
-        android:layout_width="413dp"
-        android:layout_height="286dp"
+        android:layout_width="match_parent"
+        android:layout_height="250dp"
         android:layout_marginTop="8dp"
-        android:contentDescription="Video.Thumbnail"
+        android:contentDescription="@string/video_thumbnail"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"

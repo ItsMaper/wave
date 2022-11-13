@@ -22,9 +22,7 @@ class HomeViewModel : ViewModel() {
     var nextPageToken: String? = null
     var querySearch: String? = null
 
-    init {
-        getVideoList()
-    }
+    init { getVideoList() }
 
     fun getVideoList(){
         _isLoading.value = true
@@ -34,6 +32,7 @@ class HomeViewModel : ViewModel() {
                 "snippet",
                 querySearch,
                 "relevance",
+                "15",
                 nextPageToken)
         client.enqueue(object : Callback<YTModel>{
             override fun onResponse(call: Call<YTModel>, response: Response<YTModel>) {
@@ -41,27 +40,16 @@ class HomeViewModel : ViewModel() {
                 if (response.isSuccessful){
                     val data = response.body()
                     if (data != null){
-                        if (data.nextPageToken != null){
-                            nextPageToken = data.nextPageToken
-                        } else {
-                            _isAllVideoLoaded.value = true
-                        }
-                        if (data.items.isNotEmpty()){
-                            _video.value = data
-                        }
-                    } else {
-                        _message.value = "No video"
-                    }
-                } else {
-                    _message.value = response.message()
-                }
-            }
+                        if (data.nextPageToken != null) { nextPageToken = data.nextPageToken }
+                        else { _isAllVideoLoaded.value = true }
+                        if (data.items.isNotEmpty()){ _video.value = data } }
+                    else { _message.value = "No video" }
+                } else { _message.value = response.message() } }
 
             override fun onFailure(call: Call<YTModel>, t: Throwable) {
                 _isLoading.value = false
                 Log.e(TAG, "Failed: ", t)
-                _message.value = t.message
-            }
+                _message.value = t.message }
         })
     }
 

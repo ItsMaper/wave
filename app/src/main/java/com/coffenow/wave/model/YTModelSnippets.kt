@@ -20,4 +20,7 @@ data class YTModelSnippets(
     @SerializedName("thumbnails")
     val thumbnails: YTModelThumbnails,
 
+    @SerializedName("channelTitle")
+    val channelTitle: String
+
 )

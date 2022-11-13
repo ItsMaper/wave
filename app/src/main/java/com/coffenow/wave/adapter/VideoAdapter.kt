@@ -27,7 +27,7 @@ class VideoAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                 it.context.startActivity(i)
             }
             binding.tvVideoTitle.text = data.snippet.title
-            binding.tvPublisher.text = data.snippet.description
+            binding.tvPublisher.text = data.snippet.channelTitle
             Glide.with(binding.root)
                 .load(data.snippet.thumbnails.high.url)
                 .into(binding.tvThumbnail)
@@ -54,6 +54,7 @@ class VideoAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         diff.dispatchUpdatesTo(this)
         rv.scrollToPosition(oldItems.size - newList.size)
     }
+
     fun clearAll(){
         oldItems.clear()
         notifyDataSetChanged()

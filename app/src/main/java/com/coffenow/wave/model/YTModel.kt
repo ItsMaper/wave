@@ -17,6 +17,7 @@ data class YTModel(
         val snippet: YTModelSnippets,
         @SerializedName("q")
         val query: String?
+
     )
     data class VideoId(
         @SerializedName("videoID")
