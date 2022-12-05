@@ -23,7 +23,8 @@ class VideoAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                 val i = Intent(it.context, PlayerActivity::class.java)
                 i.putExtra("video_img", data.snippet.thumbnails.high.url)
                 i.putExtra("video_title", data.snippet.title)
-                i.putExtra("video_description", data.snippet.description)
+                i.putExtra("channelTitle", data.snippet.channelTitle)
+                i.putExtra("videoId", data.videoId.videoID)
                 it.context.startActivity(i)
             }
             binding.tvVideoTitle.text = data.snippet.title

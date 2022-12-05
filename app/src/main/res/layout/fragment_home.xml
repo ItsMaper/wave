@@ -11,8 +11,6 @@
         android:id="@+id/rv_video"
         android:layout_width="409dp"
         android:layout_height="729dp"
-        android:paddingRight="20dp"
-        android:paddingLeft="20dp"
         android:textAlignment="center" />
 
 

@@ -11,9 +11,6 @@ data class YTModelSnippets(
     @SerializedName("description")
     val description: String,
 
-    @SerializedName("customUrl")
-    val customUrl: String,
-
     @SerializedName("publishedAt")
     val publishedAt: String,
 

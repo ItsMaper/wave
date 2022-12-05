@@ -8,8 +8,12 @@
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_playlist"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_width="392dp"
+        android:layout_height="734dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/nav_host_fragment_activity_main"
+        tools:ignore="UnknownIdInLayout" />
 
     <ProgressBar
         android:id="@+id/progressBar"

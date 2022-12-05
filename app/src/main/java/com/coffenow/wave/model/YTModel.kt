@@ -12,15 +12,10 @@ data class YTModel(
 ) {
     data class Items(
         @SerializedName("id")
-        val videoId: VideoId,
+        val videoId: YTModelID,
         @SerializedName("snippet")
         val snippet: YTModelSnippets,
         @SerializedName("q")
         val query: String?
-
-    )
-    data class VideoId(
-        @SerializedName("videoID")
-        val id: String
     )
 }

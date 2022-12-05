@@ -13,8 +13,7 @@ class PlaylistAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private val oldItems = ArrayList<YTModelPlayLists.PlaylistItem>()
 
-    class PlaylistHolder(itemView: ItemPlaylistBinding) :
-        RecyclerView.ViewHolder(itemView.root){
+    class PlaylistHolder(itemView: ItemPlaylistBinding) : RecyclerView.ViewHolder(itemView.root){
         private val binding = itemView
 
         fun setData(data: YTModelPlayLists.PlaylistItem){
@@ -24,7 +23,6 @@ class PlaylistAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             Glide.with(binding.root).load(data.snippetYt.thumbnails.high.url)
                 .into(binding.thumbnail)
         }
-
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -47,5 +45,7 @@ class PlaylistAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         diff.dispatchUpdatesTo(this)
         rv.scrollToPosition(oldItems.size - newList.size)
     }
-
+    fun clearAll(){
+        oldItems.clear()
+    }
 }

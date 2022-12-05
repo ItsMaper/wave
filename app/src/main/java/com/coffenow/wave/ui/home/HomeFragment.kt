@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.view.*
 import android.widget.AbsListView
 import android.widget.Toast
-import android.widget.Toolbar
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
@@ -14,7 +13,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.coffenow.wave.R
-import com.coffenow.wave.activities.MainActivity
 import com.coffenow.wave.adapter.VideoAdapter
 import com.coffenow.wave.databinding.FragmentHomeBinding
 
@@ -82,13 +80,6 @@ class HomeFragment : Fragment(), MenuProvider {
             ).show()
         }
 
-    }
-
-
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setHasOptionsMenu(true)
     }
 
     override fun onCreateView(

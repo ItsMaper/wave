@@ -3,6 +3,7 @@ package com.coffenow.wave.network
 
 import com.coffenow.wave.model.YTModel
 import com.coffenow.wave.model.YTModelPlayLists
+import com.coffenow.wave.model.YTModelPlaylistItem
 import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.Query
@@ -21,9 +22,17 @@ interface ApiServices {
     @GET("playlists")
     fun getPlaylist(
         @Query("part") part: String,
-        @Query("q") query: String?,
+        @Query("channelId") channelId: String?,
         @Query("type") type: String,
         @Query("maxResults") maxResults: String,
         @Query("pageToken") pageToken: String?
     ) : Call<YTModelPlayLists>
+
+    @GET("playlistItems")
+    fun getPlaylistItems(
+        @Query("part") part: String,
+        @Query("playlistId") playlist: String,
+        @Query("pageToken") pageToken: String?
+    ) : Call<YTModelPlaylistItem>
+
 }

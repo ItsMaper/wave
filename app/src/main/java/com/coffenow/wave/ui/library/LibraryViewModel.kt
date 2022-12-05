@@ -1,7 +1,6 @@
 package com.coffenow.wave.ui.library
 
 import android.util.Log
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.coffenow.wave.model.YTModelPlayLists
@@ -31,9 +30,9 @@ class LibraryViewModel : ViewModel() {
             .getService()
             .getPlaylist(
                 "snippet,contentDetails",
-                "barak",
+                "UC0KvzOWr83tdsdQWUsuf3Hw",
                 "playlist",
-                "10",
+                "50",
                 nextPageToken)
         client.enqueue(object : Callback<YTModelPlayLists>{
             override fun onResponse(

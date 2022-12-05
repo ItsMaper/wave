@@ -32,7 +32,7 @@ class HomeViewModel : ViewModel() {
                 "snippet",
                 querySearch,
                 "relevance",
-                "15",
+                "10",
                 nextPageToken)
         client.enqueue(object : Callback<YTModel>{
             override fun onResponse(call: Call<YTModel>, response: Response<YTModel>) {
@@ -45,7 +45,6 @@ class HomeViewModel : ViewModel() {
                         if (data.items.isNotEmpty()){ _video.value = data } }
                     else { _message.value = "No video" }
                 } else { _message.value = response.message() } }
-
             override fun onFailure(call: Call<YTModel>, t: Throwable) {
                 _isLoading.value = false
                 Log.e(TAG, "Failed: ", t)

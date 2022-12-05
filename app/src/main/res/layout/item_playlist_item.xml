@@ -4,13 +4,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/main_color">
+    android:layout_marginStart="0dp"
+    android:background="@color/sub_color">
 
     <ImageView
-        android:id="@+id/tv_thumbnail"
-        android:layout_width="110dp"
-        android:layout_height="70dp"
+        android:id="@+id/iv_thumbnail"
+        android:layout_width="100dp"
+        android:layout_height="60dp"
+        android:adjustViewBounds="true"
         android:contentDescription="@string/video_thumbnail"
+        android:scaleType="centerCrop"
         android:layout_margin="5dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -19,24 +22,24 @@
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/tv_video_title"
         android:layout_width="wrap_content"
-        android:layout_height="20dp"
-        android:layout_marginStart="4dp"
-        android:layout_marginTop="4dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="8dp"
+        android:ellipsize="end"
+        android:maxLines="2"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
         android:textColor="@color/white"
-        app:layout_constraintStart_toEndOf="@+id/tv_thumbnail"
+        app:layout_constraintStart_toEndOf="@+id/iv_thumbnail"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="@tools:sample/full_names" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/tv_publisher"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_width="189dp"
+        android:layout_height="19dp"
         android:layout_marginTop="5dp"
-        android:layout_marginBottom="8dp"
         android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
         android:textColor="@color/white"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/tv_video_title"
         app:layout_constraintStart_toStartOf="@+id/tv_video_title"
         app:layout_constraintTop_toBottomOf="@+id/tv_video_title"
         tools:text="@tools:sample/first_names" />
