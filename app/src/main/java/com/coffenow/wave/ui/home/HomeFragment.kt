@@ -5,7 +5,6 @@ import android.content.Context
 import android.os.Bundle
 import android.view.*
 import android.widget.AbsListView
-import android.widget.Toast
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
@@ -32,10 +31,24 @@ class HomeFragment : Fragment(), MenuProvider {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         activity?.addMenuProvider(this)
+        initRecyclerView()
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        videoViewModel =
+            ViewModelProvider(this).get(HomeViewModel::class.java)
+        _binding = FragmentHomeBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    private fun initRecyclerView() {
         val manager = LinearLayoutManager(requireContext())
         binding.rvVideo.adapter = adapter
         binding.rvVideo.layoutManager = manager
-
         binding.rvVideo.addOnScrollListener(object : RecyclerView.OnScrollListener(){
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
@@ -54,8 +67,6 @@ class HomeFragment : Fragment(), MenuProvider {
                     if (!isLoading){
                         if (!isAllVideoLoaded){
                             videoViewModel?.getVideoList()
-                        } else {
-                            Toast.makeText(requireContext(), "All video loaded", Toast.LENGTH_SHORT).show()
                         }
                     }
                 }
@@ -64,32 +75,10 @@ class HomeFragment : Fragment(), MenuProvider {
         })
         videoViewModel?.video?.observe(viewLifecycleOwner) {
             if (it != null && it.items.isNotEmpty()) {
-                adapter.setData(it.items, binding.rvVideo)
+                adapter.setDataDiff(it.items, binding.rvVideo)
             }
         }
-        videoViewModel?.isAllVideoLoaded?.observe(viewLifecycleOwner) {
-            isAllVideoLoaded = it
-            if (it) Toast.makeText(
-                requireContext(),
-                "All video has been loaded",
-                Toast.LENGTH_SHORT
-            ).show()
-        }
-
     }
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-
-    ): View {
-        videoViewModel =
-            ViewModelProvider(this).get(HomeViewModel::class.java)
-        _binding = FragmentHomeBinding.inflate(inflater, container, false)
-        return binding.root
-    }
-
 
     override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
         val searchManager = requireActivity().getSystemService(Context.SEARCH_SERVICE) as SearchManager
@@ -121,5 +110,6 @@ class HomeFragment : Fragment(), MenuProvider {
     override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
         TODO("Not yet implemented")
     }
+
     }
 

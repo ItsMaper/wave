@@ -10,20 +10,7 @@ import com.coffenow.wave.diffutils.PlaylistDiffUtil
 import com.coffenow.wave.model.YTModelPlayLists
 
 class PlaylistAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-
     private val oldItems = ArrayList<YTModelPlayLists.PlaylistItem>()
-
-    class PlaylistHolder(itemView: ItemPlaylistBinding) : RecyclerView.ViewHolder(itemView.root){
-        private val binding = itemView
-
-        fun setData(data: YTModelPlayLists.PlaylistItem){
-            binding.tvPlaylistTitle.text = data.snippetYt.title
-            val videoCount = "${data.contentDetail.itemCount} videos"
-            binding.tvVideoCount.text = videoCount
-            Glide.with(binding.root).load(data.snippetYt.thumbnails.high.url)
-                .into(binding.thumbnail)
-        }
-    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val view = ItemPlaylistBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -37,8 +24,18 @@ class PlaylistAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     override fun getItemCount(): Int {
         return oldItems.size
     }
+    class PlaylistHolder(itemView: ItemPlaylistBinding) : RecyclerView.ViewHolder(itemView.root){
+        private val binding = itemView
 
-    fun setData(newList: List<YTModelPlayLists.PlaylistItem>, rv: RecyclerView){
+        fun setData(data: YTModelPlayLists.PlaylistItem){
+            binding.tvPlaylistTitle.text = data.snippetYt.title
+            val videoCount = "${data.contentDetail.itemCount} videos"
+            binding.tvVideoCount.text = videoCount
+            Glide.with(binding.root).load(data.snippetYt.thumbnails.high.url)
+                .into(binding.thumbnail)
+        }
+    }
+    fun setDataDiff(newList: List<YTModelPlayLists.PlaylistItem>, rv: RecyclerView){
         val playlistDiff = PlaylistDiffUtil(oldItems, newList)
         val diff = DiffUtil.calculateDiff(playlistDiff)
         oldItems.addAll(newList)

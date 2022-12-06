@@ -62,24 +62,14 @@ class LibraryFragment : Fragment() {
         })
 
         playlistViewModel?.playlist?.observe(viewLifecycleOwner) {
-            adapter.setData(it?.items!!, binding.rvPlaylist)
+            adapter.setDataDiff(it?.items!!, binding.rvPlaylist)
             it.nextPageToken?.let { token ->
                 Log.e("next page token", token)
             }
         }
 
-        playlistViewModel?.isLoading?.observe(viewLifecycleOwner) {
-            isLoading = it
-            binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
-        }
-
         playlistViewModel?.isAllPlaylistLoaded?.observe(viewLifecycleOwner) {
             isAllVideoLoaded = it
-            if (it) Toast.makeText(
-                requireContext(),
-                "All playlist has been loaded",
-                Toast.LENGTH_SHORT
-            ).show()
         }
 
     }

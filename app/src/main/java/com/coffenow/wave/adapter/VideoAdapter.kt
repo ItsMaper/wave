@@ -11,9 +11,20 @@ import com.coffenow.wave.databinding.ItemVideoBinding
 import com.coffenow.wave.diffutils.VideoDiffUtil
 import com.coffenow.wave.model.YTModel
 
-class VideoAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class VideoAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    private var oldItems =  ArrayList<YTModel.Items>()
+    private var oldItems = ArrayList<YTModel.Items>()
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        val view = ItemVideoBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return VideoHolder(view)
+    }
+
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        (holder as VideoHolder).setData(oldItems[position])
+    }
+    override fun getItemCount(): Int = oldItems.size
+
 
     class VideoHolder(itemView: ItemVideoBinding) : RecyclerView.ViewHolder(itemView.root){
         private val binding = itemView
@@ -35,20 +46,7 @@ class VideoAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        val view = ItemVideoBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return VideoHolder(view)
-    }
-
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        (holder as VideoHolder).setData(oldItems[position])
-    }
-
-    override fun getItemCount(): Int {
-        return oldItems.size
-    }
-
-    fun setData(newList: List<YTModel.Items>, rv: RecyclerView){
+    fun setDataDiff(newList: List<YTModel.Items>, rv: RecyclerView){
         val videoDiff = VideoDiffUtil(oldItems, newList)
         val diff = DiffUtil.calculateDiff(videoDiff)
         oldItems.addAll(newList)
