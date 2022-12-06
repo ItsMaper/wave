@@ -67,10 +67,6 @@ class HomeFragment : Fragment(), MenuProvider {
                 adapter.setData(it.items, binding.rvVideo)
             }
         }
-        videoViewModel?.isLoading?.observe(viewLifecycleOwner) {
-            isLoading = it
-            binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
-        }
         videoViewModel?.isAllVideoLoaded?.observe(viewLifecycleOwner) {
             isAllVideoLoaded = it
             if (it) Toast.makeText(
