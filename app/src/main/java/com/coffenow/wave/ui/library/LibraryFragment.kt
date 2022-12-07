@@ -27,6 +27,16 @@ class LibraryFragment : Fragment() {
     private var scrollOutItem = -1
     private var isAllVideoLoaded = false
 
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        playlistViewModel = ViewModelProvider(this).get(LibraryViewModel::class.java)
+        _binding = FragmentLibraryBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -74,14 +84,5 @@ class LibraryFragment : Fragment() {
 
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        playlistViewModel =
-            ViewModelProvider(this).get(LibraryViewModel::class.java)
-        _binding = FragmentLibraryBinding.inflate(inflater, container, false)
-        return binding.root
-    }
+
 }

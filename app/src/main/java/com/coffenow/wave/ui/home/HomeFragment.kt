@@ -65,11 +65,7 @@ class HomeFragment : Fragment(), MenuProvider {
                 if (isScroll && (currentItem + scrollOutItem == totalItem)){
                     isScroll = false
                     if (!isLoading){
-                        if (!isAllVideoLoaded){
-                            videoViewModel?.getVideoList()
-                        }
-                    }
-                }
+                        if (!isAllVideoLoaded){ videoViewModel?.getVideoList() } } }
             }
 
         })
@@ -88,6 +84,7 @@ class HomeFragment : Fragment(), MenuProvider {
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(q: String): Boolean {
                 if (q.isNotEmpty()){
+                    print(q)
                     videoViewModel?.querySearch = q
                     videoViewModel?.nextPageToken = null
                     adapter.clearAll()
@@ -98,6 +95,7 @@ class HomeFragment : Fragment(), MenuProvider {
 
             override fun onQueryTextChange(newText: String): Boolean {
                 if (newText.isEmpty()){
+
                     videoViewModel?.querySearch = null
                     videoViewModel?.nextPageToken = null
                     adapter.clearAll()

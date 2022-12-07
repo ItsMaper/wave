@@ -8,12 +8,6 @@ data class YTModelSnippets(
     @SerializedName("title")
     val title: String,
 
-    @SerializedName("description")
-    val description: String,
-
-    @SerializedName("publishedAt")
-    val publishedAt: String,
-
     @SerializedName("thumbnails")
     val thumbnails: YTModelThumbnails,
 

@@ -3,7 +3,7 @@ package com.coffenow.wave.ui.library
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.coffenow.wave.model.YTModelPlayLists
+import com.coffenow.wave.model.YTModel
 import com.coffenow.wave.network.ApiConfig
 
 import retrofit2.Call
@@ -12,7 +12,7 @@ import retrofit2.Response
 
 class LibraryViewModel : ViewModel() {
 
-    private val _playlist = MutableLiveData<YTModelPlayLists?>()
+    private val _playlist = MutableLiveData<YTModel?>()
     val playlist = _playlist
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading = _isLoading
@@ -28,16 +28,16 @@ class LibraryViewModel : ViewModel() {
         _isLoading.value = true
         val client = ApiConfig
             .getService()
-            .getPlaylist(
+            .getVideoRelated(
                 "snippet,contentDetails",
-                "UC0KvzOWr83tdsdQWUsuf3Hw",
-                "playlist",
-                "50",
+                "0bwlDBtGVd0",
+                "video",
+                "5",
                 nextPageToken)
-        client.enqueue(object : Callback<YTModelPlayLists>{
+        client.enqueue(object : Callback<YTModel>{
             override fun onResponse(
-                call: Call<YTModelPlayLists>,
-                response: Response<YTModelPlayLists>
+                call: Call<YTModel>,
+                response: Response<YTModel>
             ) {
                 _isLoading.value = false
                 if (response.isSuccessful){
@@ -57,7 +57,7 @@ class LibraryViewModel : ViewModel() {
 
             }
 
-            override fun onFailure(call: Call<YTModelPlayLists>, t: Throwable) {
+            override fun onFailure(call: Call<YTModel>, t: Throwable) {
                 _isLoading.value = false
                 Log.e(TAG, "Failure: ", t)
             }
@@ -65,7 +65,7 @@ class LibraryViewModel : ViewModel() {
     }
 
     companion object {
-        private val TAG = YTModelPlayLists::class.java.simpleName
+        private val TAG = YTModel::class.java.simpleName
     }
 
 }
