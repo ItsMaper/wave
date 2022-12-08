@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.coffenow.wave.model.YTModel
 import com.coffenow.wave.network.ApiConfig
+import com.coffenow.wave.ui.home.HomeViewModel
 
 import retrofit2.Call
 import retrofit2.Callback
@@ -16,6 +17,8 @@ class LibraryViewModel : ViewModel() {
     val playlist = _playlist
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading = _isLoading
+    private val _message = MutableLiveData<String>()
+    val message = _message
     private val _isAllPlaylistLoaded = MutableLiveData<Boolean>()
     val isAllPlaylistLoaded = _isAllPlaylistLoaded
     var nextPageToken: String? = null
@@ -29,12 +32,12 @@ class LibraryViewModel : ViewModel() {
         val client = ApiConfig
             .getService()
             .getVideoRelated(
-                "snippet,contentDetails",
+                "snippet",
                 "0bwlDBtGVd0",
                 "video",
                 "5",
                 nextPageToken)
-        client.enqueue(object : Callback<YTModel>{
+        client.enqueue(/* callback = */ object : Callback<YTModel>{
             override fun onResponse(
                 call: Call<YTModel>,
                 response: Response<YTModel>
@@ -47,20 +50,15 @@ class LibraryViewModel : ViewModel() {
                             nextPageToken = data.nextPageToken
                         } else {
                             nextPageToken = null
-                            _isAllPlaylistLoaded.value = true
-                        }
-                        if (data.items.isNotEmpty()){
-                            _playlist.value = data
-                        }
-                    }
-                }
+                            _isAllPlaylistLoaded.value = true }
+                        if (data.items.isNotEmpty()){ _playlist.value = data }
+                    } else {_message.value = "No video"}
+                } else { _message.value = response.message() } }
 
-            }
-
-            override fun onFailure(call: Call<YTModel>, t: Throwable) {
+            override fun onFailure(call: Call<YTModel>, t: Throwable)  {
                 _isLoading.value = false
-                Log.e(TAG, "Failure: ", t)
-            }
+                Log.e(TAG, "Failed: ", t)
+                _message.value = t.message }
         })
     }
 

@@ -32,7 +32,7 @@ class LibraryFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        playlistViewModel = ViewModelProvider(this).get(LibraryViewModel::class.java)
+        playlistViewModel = ViewModelProvider(this)[LibraryViewModel::class.java]
         _binding = FragmentLibraryBinding.inflate(inflater, container, false)
         return binding.root
     }

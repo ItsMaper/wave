@@ -12,6 +12,7 @@ interface ApiServices {
     fun getVideo(
         @Query("part") part: String,
         @Query("q") query: String?,
+        @Query("type") type: String,
         @Query("order") order: String,
         @Query("maxResults") maxResults: String,
         @Query("pageToken") pageToken: String?

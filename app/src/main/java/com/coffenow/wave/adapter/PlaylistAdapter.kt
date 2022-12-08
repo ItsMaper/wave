@@ -29,7 +29,7 @@ class PlaylistAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
         fun setData(data: YTModel.Items){
             binding.tvPlaylistTitle.text = data.snippet.title
-            binding.tvVideoCount.text = "20"
+            binding.tvVideoCount.text = "20 Videos"
             Glide.with(binding.root).load(data.snippet.thumbnails.high.url)
                 .into(binding.thumbnail)
         }

@@ -31,8 +31,9 @@ class HomeViewModel : ViewModel() {
             .getVideo(
                 "snippet",
                 querySearch,
+                "video",
                 "relevance",
-                "5",
+                "8",
                 nextPageToken)
         client.enqueue(object : Callback<YTModel>{
             override fun onResponse(call: Call<YTModel>, response: Response<YTModel>) {
@@ -42,9 +43,7 @@ class HomeViewModel : ViewModel() {
                     if (data != null){
                         if (data.nextPageToken != null) { nextPageToken = data.nextPageToken }
                         else { _isAllVideoLoaded.value = true }
-                        if (data.items.isNotEmpty()){ _video.value = data
-                            print(data)
-                        } }
+                        if (data.items.isNotEmpty()){ _video.value = data } }
                     else { _message.value = "No video" }
                 } else { _message.value = response.message() } }
             override fun onFailure(call: Call<YTModel>, t: Throwable) {

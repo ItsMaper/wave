@@ -7,6 +7,7 @@ import android.util.Log
 import android.widget.Toast
 import com.coffenow.wave.R
 import com.coffenow.wave.databinding.ActivityAuthBinding
+import com.coffenow.wave.databinding.FragmentUserBinding
 import com.coffenow.wave.ui.user.login
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -16,30 +17,31 @@ import com.google.firebase.auth.GoogleAuthProvider
 
 class AuthActivity : AppCompatActivity() {
     private lateinit var  nAuth : FirebaseAuth
+    private var fragmentUserBinding : FragmentUserBinding? = null
     private val Google_SIGN_IN = 100
     private lateinit var binding : ActivityAuthBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_auth)
-        nAuth = FirebaseAuth.getInstance()
-        authUser()
     }
 
-    private fun authUser(){
-        binding.googleSignIn.setOnClickListener(){
+    fun authUser(){
+        nAuth = FirebaseAuth.getInstance()
+        fragmentUserBinding?.googleSignIn?.setOnClickListener {
             val googleConf = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
                 .build()
             val googleClient = GoogleSignIn.getClient(this, googleConf)
-            val signInItent = googleClient.signInIntent
-            startActivityForResult(signInItent,Google_SIGN_IN)
+            val signInIntent = googleClient.signInIntent
+            startActivityForResult(signInIntent,Google_SIGN_IN)
         }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+
         if(requestCode==Google_SIGN_IN){
             val task = GoogleSignIn.getSignedInAccountFromIntent(data)
             try{
@@ -67,5 +69,9 @@ class AuthActivity : AppCompatActivity() {
                 }
             }
 
+    }
+
+    companion object{
+        private val TAG = AuthActivity::class.java.simpleName
     }
 }

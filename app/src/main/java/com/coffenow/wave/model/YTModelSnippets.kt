@@ -13,5 +13,4 @@ data class YTModelSnippets(
 
     @SerializedName("channelTitle")
     val channelTitle: String
-
 )
