@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="main_color">#1B1C27</color>
-    <color name="sub_color">#1C2034</color>
+    <color name="main">#1B1C27</color>
+    <color name="sub">#1C2034</color>
+    <color name="thirty">#37284B</color>
+    <color name="blue">#00098A</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 </resources>

@@ -7,42 +7,48 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.coffenow.wave.activities.PlayerActivity
-import com.coffenow.wave.databinding.ItemVideoBinding
+import com.coffenow.wave.databinding.OnlineMusicBinding
 import com.coffenow.wave.diffutils.VideoDiffUtil
 import com.coffenow.wave.model.YTModel
 
-class VideoAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class OnlineMusicAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private var oldItems = ArrayList<YTModel.Items>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        val view = ItemVideoBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return VideoHolder(view)
+        val view = OnlineMusicBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return OnlineHolder(view)
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        (holder as VideoHolder).setData(oldItems[position])
+        (holder as OnlineHolder).setData(oldItems[position])
     }
     override fun getItemCount(): Int = oldItems.size
 
 
-    class VideoHolder(itemView: ItemVideoBinding) : RecyclerView.ViewHolder(itemView.root){
+    class OnlineHolder(itemView: OnlineMusicBinding) : RecyclerView.ViewHolder(itemView.root){
         private val binding = itemView
 
         fun setData(data: YTModel.Items){
+            val videoID= data.videoId.videoID
             binding.root.setOnClickListener {
                 val i = Intent(it.context, PlayerActivity::class.java)
-                i.putExtra("video_img", data.snippet.thumbnails.high.url)
-                i.putExtra("video_title", data.snippet.title)
-                i.putExtra("channelTitle", data.snippet.channelTitle)
-                i.putExtra("videoId", data.videoId.videoID)
+                i.putExtra("type", "web")
+                i.putExtra("thumbnail", data.snippet.thumbnails.high.url)
+                i.putExtra("title", data.snippet.title)
+                i.putExtra("publisher", data.snippet.channelTitle)
+                i.putExtra("id", videoID)
                 it.context.startActivity(i)
             }
-            binding.tvVideoTitle.text = data.snippet.title
-            binding.tvPublisher.text = data.snippet.channelTitle
+
+            binding.downloadMusic.setOnClickListener{
+                val url = "https://convert2mp3s.com/api/single/mp3?url=$videoID"
+            }
+            binding.onlineTitle.text = data.snippet.title
+            binding.onlinePublisher.text = data.snippet.channelTitle
             Glide.with(binding.root)
                 .load(data.snippet.thumbnails.high.url)
-                .into(binding.tvThumbnail)
+                .into(binding.onlineThumbnail)
         }
     }
 

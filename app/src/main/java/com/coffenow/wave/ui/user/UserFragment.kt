@@ -4,28 +4,17 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.coffenow.wave.activities.AuthActivity
-import com.coffenow.wave.databinding.ActivityAuthBinding
 import com.coffenow.wave.databinding.FragmentUserBinding
 
 
 class UserFragment : Fragment() {
 
     private var _binding: FragmentUserBinding? = null
-    private var AuthActivity: AuthActivity? = null
     private val binding get() = _binding!!
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        binding.googleSignIn.setOnClickListener {
-            AuthActivity?.authUser()
-        }
-        binding.googleLogOut.setOnClickListener {
-            AuthActivity?.logout()
-        }
-    }
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -36,10 +25,14 @@ class UserFragment : Fragment() {
         return binding.root
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+    override fun onResume() {
+        super.onResume()
+        (activity as AppCompatActivity?)!!.supportActionBar!!.hide()
     }
 
+    override fun onStop() {
+        super.onStop()
+        (activity as AppCompatActivity?)!!.supportActionBar!!.show()
+    }
 
 }

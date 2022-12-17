@@ -3,6 +3,7 @@ package com.coffenow.wave.ui.library
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.coffenow.wave.databinding.FragmentHomeBinding
 import com.coffenow.wave.model.YTModel
 import com.coffenow.wave.network.ApiConfig
 import com.coffenow.wave.ui.home.HomeViewModel
@@ -22,6 +23,7 @@ class LibraryViewModel : ViewModel() {
     private val _isAllPlaylistLoaded = MutableLiveData<Boolean>()
     val isAllPlaylistLoaded = _isAllPlaylistLoaded
     var nextPageToken: String? = null
+    var relatedTo : String? = null
 
     init {
         getPlaylist()
@@ -33,7 +35,7 @@ class LibraryViewModel : ViewModel() {
             .getService()
             .getVideoRelated(
                 "snippet",
-                "0bwlDBtGVd0",
+                relatedTo,
                 "video",
                 "5",
                 nextPageToken)

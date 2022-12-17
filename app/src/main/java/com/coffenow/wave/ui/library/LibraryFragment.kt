@@ -11,8 +11,11 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.coffenow.wave.activities.MainActivity
 import com.coffenow.wave.adapter.PlaylistAdapter
 import com.coffenow.wave.databinding.FragmentLibraryBinding
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.MobileAds
 
 class LibraryFragment : Fragment() {
 
@@ -40,6 +43,11 @@ class LibraryFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        initAdsView()
+        initRecyclerView()
+         }
+
+    private fun initRecyclerView() {
         val manager = LinearLayoutManager(requireContext())
         binding.rvPlaylist.adapter = adapter
         binding.rvPlaylist.layoutManager = manager
@@ -64,25 +72,23 @@ class LibraryFragment : Fragment() {
                             playlistViewModel?.getPlaylist()
                         } else {
                             Toast.makeText(requireContext(), "All playlist loaded", Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                }
-            }
-
-        })
+                        } } } } })
 
         playlistViewModel?.playlist?.observe(viewLifecycleOwner) {
             adapter.setDataDiff(it?.items!!, binding.rvPlaylist)
             it.nextPageToken?.let { token ->
-                Log.e("next page token", token)
-            }
-        }
+                Log.e("next page token", token) } }
 
         playlistViewModel?.isAllPlaylistLoaded?.observe(viewLifecycleOwner) {
-            isAllVideoLoaded = it
-        }
-
+            isAllVideoLoaded = it }
     }
 
+    private fun initAdsView() {
+        val appContext= requireContext().applicationContext
+        MobileAds.initialize(appContext) {}
+        val adView = binding.adView2
+        val adRequest = AdRequest.Builder().build()
+        adView.loadAd(adRequest)
+    }
 
 }

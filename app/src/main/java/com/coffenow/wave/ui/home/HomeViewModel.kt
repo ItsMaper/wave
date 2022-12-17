@@ -1,5 +1,6 @@
 package com.coffenow.wave.ui.home
 
+import android.provider.MediaStore
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -9,22 +10,30 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
+
 class HomeViewModel : ViewModel() {
 
-    private val _video = MutableLiveData<YTModel?>()
-    val video = _video
+    private val _online_data = MutableLiveData<YTModel?>()
+    val online_data = _online_data
+    private val _local_data = MutableLiveData<YTModel?>()
+    val local_data = _local_data
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading = _isLoading
-    private val _isAllVideoLoaded = MutableLiveData<Boolean>()
-    val isAllVideoLoaded = _isAllVideoLoaded
+    private val _isAllDataOnlineLoaded = MutableLiveData<Boolean>()
+    val isAllDataOnlineLoaded = _isAllDataOnlineLoaded
     private val _message = MutableLiveData<String>()
     val message = _message
     var nextPageToken: String? = null
     var querySearch: String? = null
 
-    init { getVideoList() }
+    init { getOnlineList() }
+    init { getLocalList() }
 
-    fun getVideoList(){
+    private fun getLocalList() {
+
+    }
+
+    fun getOnlineList(){
         _isLoading.value = true
         val client = ApiConfig
             .getService()
@@ -33,7 +42,7 @@ class HomeViewModel : ViewModel() {
                 querySearch,
                 "video",
                 "relevance",
-                "8",
+                "12",
                 nextPageToken)
         client.enqueue(object : Callback<YTModel>{
             override fun onResponse(call: Call<YTModel>, response: Response<YTModel>) {
@@ -42,8 +51,8 @@ class HomeViewModel : ViewModel() {
                     val data = response.body()
                     if (data != null){
                         if (data.nextPageToken != null) { nextPageToken = data.nextPageToken }
-                        else { _isAllVideoLoaded.value = true }
-                        if (data.items.isNotEmpty()){ _video.value = data } }
+                        else { _isAllDataOnlineLoaded.value = true }
+                        if (data.items.isNotEmpty()){ _online_data.value = data } }
                     else { _message.value = "No video" }
                 } else { _message.value = response.message() } }
             override fun onFailure(call: Call<YTModel>, t: Throwable) {
