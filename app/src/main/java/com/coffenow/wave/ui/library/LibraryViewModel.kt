@@ -3,10 +3,8 @@ package com.coffenow.wave.ui.library
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.coffenow.wave.databinding.FragmentHomeBinding
 import com.coffenow.wave.model.YTModel
-import com.coffenow.wave.network.ApiConfig
-import com.coffenow.wave.ui.home.HomeViewModel
+import com.coffenow.wave.network.YTApiConfig
 
 import retrofit2.Call
 import retrofit2.Callback
@@ -31,7 +29,7 @@ class LibraryViewModel : ViewModel() {
 
     fun getPlaylist() {
         _isLoading.value = true
-        val client = ApiConfig
+        val client = YTApiConfig
             .getService()
             .getVideoRelated(
                 "snippet",

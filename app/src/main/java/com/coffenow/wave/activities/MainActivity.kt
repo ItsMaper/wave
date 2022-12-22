@@ -1,7 +1,5 @@
 package com.coffenow.wave.activities
 
-import android.net.ConnectivityManager
-import android.net.Network
 import android.os.Bundle
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity

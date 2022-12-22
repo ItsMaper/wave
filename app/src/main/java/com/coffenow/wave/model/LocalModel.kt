@@ -1,8 +1,10 @@
 package com.coffenow.wave.model
 
+import android.net.Uri
+
 data class LocalModel(
-    val id:String,
+    val id: Long,
     val title:String,
-    val duration: Long = 0,
-    val path: String,
-    val artUri:String)
+    val uri: Uri )
+
+val AudioList = mutableListOf<LocalModel>()

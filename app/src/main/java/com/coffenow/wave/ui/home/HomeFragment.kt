@@ -1,6 +1,7 @@
 package com.coffenow.wave.ui.home
 
 import android.app.SearchManager
+import android.content.ContentUris
 import android.content.Context
 import android.os.Bundle
 import android.view.*
@@ -9,9 +10,14 @@ import android.view.View.VISIBLE
 import android.widget.AbsListView
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import android.net.Uri
+import android.os.Build
+import android.provider.MediaStore
 import android.util.Log
 import androidx.appcompat.widget.SearchView
+import androidx.core.content.ContentProviderCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -19,6 +25,8 @@ import com.coffenow.wave.R
 import com.coffenow.wave.adapter.LocalMusicAdapter
 import com.coffenow.wave.adapter.OnlineMusicAdapter
 import com.coffenow.wave.databinding.FragmentHomeBinding
+import com.coffenow.wave.model.LocalModel
+import java.io.File
 
 class HomeFragment : Fragment() {
 
@@ -33,7 +41,6 @@ class HomeFragment : Fragment() {
     private var totalItem = -1
     private var scrollOutItem = -1
     private var isAllVideoLoaded = false
-
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -51,7 +58,6 @@ class HomeFragment : Fragment() {
         }
     }
 
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -61,6 +67,8 @@ class HomeFragment : Fragment() {
             ViewModelProvider(this)[HomeViewModel::class.java]
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         return binding.root }
+
+
 
     private fun netState(context: Context): Boolean {
         val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager

@@ -4,15 +4,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="10dp"
-    android:layout_marginRight="10dp"
-    android:layout_marginLeft="10dp"
+    android:layout_marginTop="2dp"
+    android:layout_marginRight="2dp"
+    android:layout_marginLeft="2dp"
     android:background="@drawable/item_rounded_borders">
 
     <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/thumbnail"
-        android:layout_width="110dp"
-        android:layout_height="70dp"
+        android:id="@+id/pp_thumbnail"
+        android:layout_width="80dp"
+        android:layout_height="45dp"
         android:layout_margin="10dp"
         android:contentDescription="@string/video_thumbnail"
         android:scaleType="centerCrop"
@@ -22,26 +22,16 @@
         tools:srcCompat="@tools:sample/backgrounds/scenic" />
 
     <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/tv_playlist_title"
+        android:id="@+id/tv_pp_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="5dp"
-        android:layout_marginTop="12dp"
         android:ellipsize="end"
         android:maxLines="2"
         android:textColor="@color/white"
-        app:layout_constraintStart_toEndOf="@+id/thumbnail"
-        app:layout_constraintTop_toTopOf="@+id/thumbnail"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/pp_thumbnail"
+        app:layout_constraintTop_toTopOf="parent"
         tools:text="@tools:sample/full_names" />
-
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/tv_video_count"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:textColor="@color/white"
-        app:layout_constraintStart_toStartOf="@+id/tv_playlist_title"
-        app:layout_constraintTop_toBottomOf="@+id/tv_playlist_title"
-        tools:text="8 Video" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

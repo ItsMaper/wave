@@ -11,7 +11,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.coffenow.wave.activities.MainActivity
 import com.coffenow.wave.adapter.PlaylistAdapter
 import com.coffenow.wave.databinding.FragmentLibraryBinding
 import com.google.android.gms.ads.AdRequest
@@ -90,5 +89,7 @@ class LibraryFragment : Fragment() {
         val adRequest = AdRequest.Builder().build()
         adView.loadAd(adRequest)
     }
+
+
 
 }

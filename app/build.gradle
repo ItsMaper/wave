@@ -18,7 +18,7 @@ android {
 
     buildTypes {
         debug{
-            buildConfigField("String", "YOUTUBE_API_KEY", '"AIzaSyA2u9CJPkHtpMDRCyAPA-t0KsI6DyypEK8"')
+            buildConfigField("String", "YOUTUBE_API_KEY", '"AIzaSyDka27nqKfXW1QEETpa8UD1Ys00xH6aqjg"')
         }
         release {
             minifyEnabled false
@@ -51,6 +51,10 @@ dependencies {
     implementation 'androidx.fragment:fragment:1.5.5'
     implementation 'androidx.core:core-splashscreen:1.0.0'
     implementation 'com.google.android.gms:play-services-ads:21.4.0'
+
+    //YT
+    implementation 'com.pierfrancescosoffritti.androidyoutubeplayer:core:11.1.0'
+
 
     //GSON + RETROFIT + OKHTTP
     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
