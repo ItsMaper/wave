@@ -10,7 +10,7 @@ import retrofit2.Callback
 import retrofit2.Response
 
 class PlayerViewModel : ViewModel() {
-    var videoId : String?= null
+    var relatedTo : String?= null
     private val _playList = MutableLiveData<YTModel?>()
     val playList_data = _playList
     var nextPageToken: String? = null
@@ -21,15 +21,13 @@ class PlayerViewModel : ViewModel() {
     private val _isAllDataOnlineLoaded = MutableLiveData<Boolean>()
     val isAllDataOnlineLoaded = _isAllDataOnlineLoaded
 
-    init { getPlayerlist() }
-
     fun getPlayerlist(){
         _isLoading.value = true
         val client = YTApiConfig
             .getService()
             .getVideoRelated(
                 "snippet",
-                videoId,
+                relatedTo,
                 "video",
                 "12",
                 nextPageToken)

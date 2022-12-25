@@ -23,9 +23,6 @@ class LibraryViewModel : ViewModel() {
     var nextPageToken: String? = null
     var relatedTo : String? = null
 
-    init {
-        getPlaylist()
-    }
 
     fun getPlaylist() {
         _isLoading.value = true
@@ -37,7 +34,7 @@ class LibraryViewModel : ViewModel() {
                 "video",
                 "5",
                 nextPageToken)
-        client.enqueue(/* callback = */ object : Callback<YTModel>{
+        client.enqueue( object : Callback<YTModel>{
             override fun onResponse(
                 call: Call<YTModel>,
                 response: Response<YTModel>
@@ -63,7 +60,7 @@ class LibraryViewModel : ViewModel() {
     }
 
     companion object {
-        private val TAG = YTModel::class.java.simpleName
+        private val TAG = LibraryViewModel::class.java.simpleName
     }
 
 }

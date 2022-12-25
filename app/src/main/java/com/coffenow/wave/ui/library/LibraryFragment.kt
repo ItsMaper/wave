@@ -29,28 +29,25 @@ class LibraryFragment : Fragment() {
     private var scrollOutItem = -1
     private var isAllVideoLoaded = false
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         playlistViewModel = ViewModelProvider(this)[LibraryViewModel::class.java]
+        playlistViewModel?.relatedTo= "po5d5Zdzwt0"
+        playlistViewModel?.getPlaylist()
         _binding = FragmentLibraryBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         initAdsView()
         initRecyclerView()
          }
 
     private fun initRecyclerView() {
+
         val manager = LinearLayoutManager(requireContext())
         binding.rvPlaylist.adapter = adapter
         binding.rvPlaylist.layoutManager = manager
-
         binding.rvPlaylist.addOnScrollListener(object : RecyclerView.OnScrollListener(){
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)

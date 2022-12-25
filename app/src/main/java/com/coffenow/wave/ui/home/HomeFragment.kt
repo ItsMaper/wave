@@ -58,13 +58,8 @@ class HomeFragment : Fragment() {
         }
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        viewModel =
-            ViewModelProvider(this)[HomeViewModel::class.java]
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        viewModel = ViewModelProvider(this)[HomeViewModel::class.java]
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         return binding.root }
 
@@ -102,6 +97,7 @@ class HomeFragment : Fragment() {
                     currentItem = manager.childCount
                     totalItem = manager.itemCount
                     scrollOutItem = manager.findFirstVisibleItemPosition() } }) }
+
         binding.localPlayer.setOnClickListener {
             binding.rvOnlineMusic.visibility= INVISIBLE
             binding.rvLocalMusic.visibility = VISIBLE }
@@ -131,6 +127,7 @@ class HomeFragment : Fragment() {
             viewModel?.online_data?.observe(viewLifecycleOwner) {
                 if (it != null && it.items.isNotEmpty()) {
                     onlineAdapter.setDataDiff(it.items, binding.rvOnlineMusic) } } }
+
         binding.onlinePlayer.setOnClickListener {
             binding.rvLocalMusic.visibility= INVISIBLE
             binding.rvOnlineMusic.visibility = VISIBLE }

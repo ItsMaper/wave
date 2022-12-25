@@ -1,18 +1,18 @@
 package com.coffenow.wave.adapter
 
-import android.content.Intent
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.coffenow.wave.activities.PlayerActivity
 import com.coffenow.wave.databinding.PlayerItemPlaylistBinding
 import com.coffenow.wave.diffutils.PlaylistDiffUtil
 import com.coffenow.wave.model.YTModel
 
 class PlayerPlaylistAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     private val playerItems = ArrayList<YTModel.Items>()
+    var currentSelected: Int? = 0
+    var addListener: ItemClickListener? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val view = PlayerItemPlaylistBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -20,27 +20,32 @@ class PlayerPlaylistAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        (holder as PPlaylistHolder).setData(playerItems[position])
+        val function = { pos: Int ->
+            if (currentSelected == null || currentSelected != pos) {
+                currentSelected = pos
+                notifyDataSetChanged()
+            }
+        }
+        (holder as PPlaylistHolder).setData(playerItems[position],position == currentSelected, function, position)
     }
+    override fun getItemCount(): Int = playerItems.size
 
-    override fun getItemCount(): Int {
-        return playerItems.size
-    }
-    class PPlaylistHolder(itemView: PlayerItemPlaylistBinding) : RecyclerView.ViewHolder(itemView.root){
+    inner class PPlaylistHolder(itemView: PlayerItemPlaylistBinding) : RecyclerView.ViewHolder(itemView.root){
         private val binding = itemView
 
-        fun setData(data: YTModel.Items){
+        fun setData(data: YTModel.Items, selected: Boolean,
+                    function: (Int) -> Unit, position: Int) {
+
+            binding.root.isSelected = selected
             binding.root.setOnClickListener {
-                val i = Intent(it.context, PlayerActivity::class.java)
-                i.putExtra("type", "web")
-                i.putExtra("thumbnail", data.snippet.thumbnails.high.url)
-                i.putExtra("title", data.snippet.title)
-                i.putExtra("publisher", data.snippet.channelTitle)
-                i.putExtra("id", data.videoId.videoID)
-                it.context.startActivity(i)
+                function(position)
+                if (!selected){
+                    addListener?.onClick(data)
+                }
             }
             binding.tvPpTitle.text = data.snippet.title
-            Glide.with(binding.root).load(data.snippet.thumbnails.high.url)
+            Glide.with(binding.root)
+                .load(data.snippet.thumbnails.high.url)
                 .into(binding.ppThumbnail)
         }
     }
@@ -53,5 +58,8 @@ class PlayerPlaylistAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     }
     fun clearAll(){
         playerItems.clear()
+    }
+    fun interface ItemClickListener {
+        fun onClick(data: YTModel.Items)
     }
 }

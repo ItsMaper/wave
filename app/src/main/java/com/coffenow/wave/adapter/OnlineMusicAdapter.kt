@@ -12,7 +12,6 @@ import com.coffenow.wave.diffutils.VideoDiffUtil
 import com.coffenow.wave.model.YTModel
 
 class OnlineMusicAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-
     private var oldItems = ArrayList<YTModel.Items>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -24,7 +23,6 @@ class OnlineMusicAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         (holder as OnlineHolder).setData(oldItems[position])
     }
     override fun getItemCount(): Int = oldItems.size
-
 
     class OnlineHolder(itemView: OnlineMusicBinding) : RecyclerView.ViewHolder(itemView.root){
         private val binding = itemView

@@ -9,6 +9,9 @@
     <string name="player_play">Play</string>
     <string name="player_prev">Previous</string>
     <string name="player_next">Next</string>
+    <string name="bucle_btn">playBucle</string>
+    <string name="shuffle_btn">playShuffle</string>
+    <string name="queue">CurrentWave</string>
     <string name="DataMode">DataMode</string>
     <string name="new_playlist">new_playlist</string>
     <string name="timer">00:00</string>

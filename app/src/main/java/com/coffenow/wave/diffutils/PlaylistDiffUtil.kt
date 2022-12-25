@@ -3,8 +3,9 @@ package com.coffenow.wave.diffutils
 import androidx.recyclerview.widget.DiffUtil
 import com.coffenow.wave.model.YTModel
 
+
 class PlaylistDiffUtil(
-    private val oldList: List<YTModel.Items>,
+    private val oldList: ArrayList<YTModel.Items>,
     private val newList: List<YTModel.Items>
 ) : DiffUtil.Callback() {
     override fun getOldListSize(): Int {
