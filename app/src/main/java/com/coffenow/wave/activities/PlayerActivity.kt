@@ -15,6 +15,7 @@ import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
 import android.widget.AbsListView
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.SeekBar
 import android.widget.TextView
@@ -32,6 +33,7 @@ import com.coffenow.wave.R
 import com.coffenow.wave.activities.viewmodel.PlayerViewModel
 import com.coffenow.wave.adapter.PlayerPlaylistAdapter
 import com.coffenow.wave.databinding.ActivityPlayerBinding
+import com.coffenow.wave.services.OnBackPlayer
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.MobileAds
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.PlayerConstants
@@ -47,6 +49,9 @@ class PlayerActivity : AppCompatActivity(), YouTubePlayerListener {
     private var playerViewModel:PlayerViewModel?=null
     private val playlistAdapter=PlayerPlaylistAdapter()
     private lateinit var rvPLaylist: RecyclerView
+    private lateinit var playerTitle: TextView
+    private lateinit var playerPublisher: TextView
+    private lateinit var playerThumbnail: ImageView
     private lateinit var playBtn:ImageButton
     private lateinit var prevBtn:ImageButton
     private lateinit var nextBtn:ImageButton
@@ -56,6 +61,7 @@ class PlayerActivity : AppCompatActivity(), YouTubePlayerListener {
     private lateinit var currentTime : TextView
     private lateinit var notificationStyle: Notification
     private lateinit var pPlaylistLayout: LinearLayout
+    private lateinit var queueText: TextView
     private val notificationStyleID = 0
     private val channelName = "channelName"
     private val channelId = "channelId"
@@ -70,6 +76,8 @@ class PlayerActivity : AppCompatActivity(), YouTubePlayerListener {
     private var scrollOutItem = -1
     private var isAllVideoLoaded = false
     private var isPlaylistFullScreen = false
+    private var isFirst = true
+    private var first = true
 
     companion object {
         const val INTENT_REQUEST = 0
@@ -85,9 +93,9 @@ class PlayerActivity : AppCompatActivity(), YouTubePlayerListener {
         _binding = ActivityPlayerBinding.inflate(layoutInflater)
         setContentView(binding.root)
         supportActionBar?.hide()
+        setterBind()
         val type:String= intent.getStringExtra("type").toString()
         if (type=="local") setLocalPlayer() else if(type == "web") setWebPlayer()
-        setterBind()
         initRecyclerView()
         //playerNotification()
         //val notifManager = NotificationManagerCompat.from(this)
@@ -103,6 +111,10 @@ class PlayerActivity : AppCompatActivity(), YouTubePlayerListener {
     private fun setterBind() {
         binding.ytpl.visibility = INVISIBLE
         rvPLaylist = binding.rvPPlaylist
+        playerTitle = binding.playerTitle
+        playerPublisher = binding.playerPublisher
+        queueText = binding.queueText
+        playerThumbnail= binding.playerThumbnail
         playBtn = binding.playerPlay
         prevBtn = binding.playerPrev
         nextBtn = binding.playerNext
@@ -123,7 +135,7 @@ class PlayerActivity : AppCompatActivity(), YouTubePlayerListener {
         }
 
         notificationStyle = NotificationCompat.Builder(this, channelId).also {
-            it.setSmallIcon(R.drawable.ic_baseline_music_note_24)
+            it.setSmallIcon(R.drawable.ic_wave_foreground)
             it.setContentTitle(intent.getStringExtra("title"))
             it.setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             it.addAction(R.drawable.ic_baseline_arrow_back_ios_24_notif, "Previous", pendingIntent)
@@ -140,11 +152,12 @@ class PlayerActivity : AppCompatActivity(), YouTubePlayerListener {
     private fun initRecyclerView() {
         playerViewModel?.relatedTo = intent.getStringExtra("id")
         playerViewModel?.getPlayerlist()
+
         val manager = LinearLayoutManager(this)
         rvPLaylist.apply {
             adapter = playlistAdapter
             layoutManager = manager
-            binding.queueText.text="15 Songs"
+            binding.queueText.text="8 Songs"
             addOnScrollListener(object :RecyclerView.OnScrollListener(){
                 override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                     super.onScrollStateChanged(recyclerView, newState)
@@ -160,42 +173,36 @@ class PlayerActivity : AppCompatActivity(), YouTubePlayerListener {
                         if (!isLoading && totalItem<=23){
                             playerViewModel?.getPlayerlist() } } } } )}
 
+
+
         playlistAdapter.addListener = PlayerPlaylistAdapter.ItemClickListener { data ->
             data.videoId.videoID.let { id ->
                 id?.let { youtubePlayer?.loadVideo(it, 0f) }
             }
-            binding.playerTitle.text = data.snippet.title
-            binding.playerPublisher.text = data.snippet.channelTitle
+            playerTitle.text = data.snippet.title
+            playerPublisher.text = data.snippet.channelTitle
+            queueText.text = data.snippet.title
             Glide.with(binding.root)
                 .load(data.snippet.thumbnails.high.url)
                 .dontAnimate()
                 .dontTransform()
-                .into(binding.playerThumbnail)
+                .into(playerThumbnail)
         }
 
         playerViewModel?.playList_data?.observe(this) {
             it?.items?.get(0)?.videoId?.videoID?.let { it1 ->
                 playlistAdapter.setDataDiff(it.items, rvPLaylist)
-                youtubePlayer?.loadVideo(it1, 0f)
             }
-            binding.playerTitle.text = it?.items?.get(0)?.snippet?.title
-            binding.playerPublisher.text = it?.items?.get(0)?.snippet?.channelTitle
-            Glide.with(binding.root)
-                .load(it?.items?.get(0)?.snippet?.thumbnails?.high?.url)
-                .dontAnimate()
-                .dontTransform()
-                .into(binding.playerThumbnail)
         }
-
         pPlaylistLayout.setOnClickListener {
             if (isPlaylistFullScreen){
                 it.translationY = 0F
                 isPlaylistFullScreen = false
-                binding.queueText.text = "$totalItem Songs"
+                queueText.text = "$totalItem Songs"
             }else{
-                it.translationY = -(binding.root.height-binding.playerThumbnail.height-(binding.adView.height*2.2)).toFloat()
+                it.translationY = -(binding.root.height-(playerThumbnail.height*1.5)).toFloat()
                 isPlaylistFullScreen = true
-                binding.queueText.text = binding.playerTitle.text
+                queueText.text = binding.playerTitle.text
             }
         }
     }
@@ -297,7 +304,18 @@ class PlayerActivity : AppCompatActivity(), YouTubePlayerListener {
 
     //WEB!
     private fun setWebPlayer() {
-        binding.playerPublisher.visibility = VISIBLE
+        playerPublisher.visibility = VISIBLE
+        if (isFirst){
+            playerTitle.text = intent.getStringExtra("title")
+            playerPublisher.text = intent.getStringExtra("publisher")
+            Glide.with(binding.root)
+                .load(intent.getStringExtra("thumbnail"))
+                .into(playerThumbnail)
+
+            isFirst=false
+        }
+        nextBtn.setOnClickListener {webQueueManagement(true)}
+        prevBtn.setOnClickListener {webQueueManagement(false)}
         val opts = IFramePlayerOptions.Builder()
             .controls(0)
             .rel(0)
@@ -315,10 +333,55 @@ class PlayerActivity : AppCompatActivity(), YouTubePlayerListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
             if(fromUser){
                 youtubePlayer?.seekTo(progress.toFloat())
-            }
-            }
+            }else{
+                if (seekBar?.progress  == seekBar?.max){
+                    webQueueManagement(true) } }}
             override fun onStartTrackingTouch(seekBar: SeekBar?) {}
             override fun onStopTrackingTouch(seekBar: SeekBar?) {} } )
+
+    }
+    private fun webQueueManagement(isNext : Boolean) {
+        var currentQueue = playlistAdapter.currentSelected
+        var key = true
+        seekBar.progress=0
+        playerViewModel?.playList_data?.observe(this) {
+            if (currentQueue != null) {
+                if (isNext){
+                    if(currentQueue>=0 && !first){
+                        currentQueue+=1
+                    }else {first = false}
+                    playlistAdapter.currentSelected = currentQueue
+                } else{
+                    if (currentQueue >0) {
+                        currentQueue-=1
+                    }else{
+                        playerTitle.text = intent.getStringExtra("title")
+                        playerPublisher.text = intent.getStringExtra("publisher")
+                        youtubePlayer?.loadVideo(intent.getStringExtra("id")!!, 0f)
+                        Glide.with(binding.root)
+                            .load(intent.getStringExtra("thumbnail"))
+                            .into(playerThumbnail)
+                        key =false
+                    }
+                    playlistAdapter.currentSelected = currentQueue
+                }
+                if(key){
+                    it?.items?.get(currentQueue)?.videoId?.videoID?.let { it1 ->
+                        youtubePlayer?.loadVideo(it1, 0f)
+                    }
+                    playerTitle.text = it?.items?.get(currentQueue)?.snippet?.title
+                    playerPublisher.text = it?.items?.get(currentQueue)?.snippet?.channelTitle
+                    Glide.with(binding.root)
+                        .load(it?.items?.get(currentQueue)?.snippet?.thumbnails?.high?.url)
+                        .dontAnimate()
+                        .dontTransform()
+                        .into(playerThumbnail)
+                }
+                if (isPlaylistFullScreen){
+                    queueText.text=playerTitle.text
+                }
+            }
+        }
     }
 
 
@@ -368,6 +431,14 @@ class PlayerActivity : AppCompatActivity(), YouTubePlayerListener {
     override fun onPlaybackRateChange(youTubePlayer: YouTubePlayer, playbackRate: PlayerConstants.PlaybackRate) {}
     override fun onApiChange(youTubePlayer: YouTubePlayer) {}
     override fun onError(youTubePlayer: YouTubePlayer, error: PlayerConstants.PlayerError) {}
+
+    override fun onStop() {
+        super.onStop()
+        val i =Intent(this, OnBackPlayer::class.java)
+        i.putExtra("max", maxTime)
+        i.putExtra("current", curTime)
+        startService(i)
+    }
 
 }
 

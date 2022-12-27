@@ -26,7 +26,6 @@ class OnlineMusicAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     class OnlineHolder(itemView: OnlineMusicBinding) : RecyclerView.ViewHolder(itemView.root){
         private val binding = itemView
-
         fun setData(data: YTModel.Items){
             val videoID= data.videoId.videoID
             binding.root.setOnClickListener {
@@ -38,7 +37,6 @@ class OnlineMusicAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                 i.putExtra("id", videoID)
                 it.context.startActivity(i)
             }
-
             binding.downloadMusic.setOnClickListener{
                 val url = "https://convert2mp3s.com/api/single/mp3?url=$videoID"
             }
@@ -50,12 +48,14 @@ class OnlineMusicAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         }
     }
 
-    fun setDataDiff(newList: List<YTModel.Items>, rv: RecyclerView){
+    fun setDataDiff(newList: List<YTModel.Items>, rv: RecyclerView, isScroll:Boolean){
         val videoDiff = VideoDiffUtil(oldItems, newList)
         val diff = DiffUtil.calculateDiff(videoDiff)
         oldItems.addAll(newList)
         diff.dispatchUpdatesTo(this)
-        rv.scrollToPosition(oldItems.size - newList.size)
+        if (isScroll){
+            rv.scrollToPosition(oldItems.size - newList.size)
+        }
     }
 
     fun clearAll(){

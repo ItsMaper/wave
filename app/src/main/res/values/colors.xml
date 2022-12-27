@@ -4,6 +4,8 @@
     <color name="sub">#1C2034</color>
     <color name="thirty">#37284B</color>
     <color name="blue">#00098A</color>
+    <color name="dark_greenBlue">#19426E</color>
+    <color name="light_greenBlue">#0A1867</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 </resources>

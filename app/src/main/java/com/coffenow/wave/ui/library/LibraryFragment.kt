@@ -31,8 +31,6 @@ class LibraryFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         playlistViewModel = ViewModelProvider(this)[LibraryViewModel::class.java]
-        playlistViewModel?.relatedTo= "po5d5Zdzwt0"
-        playlistViewModel?.getPlaylist()
         _binding = FragmentLibraryBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -44,7 +42,6 @@ class LibraryFragment : Fragment() {
          }
 
     private fun initRecyclerView() {
-
         val manager = LinearLayoutManager(requireContext())
         binding.rvPlaylist.adapter = adapter
         binding.rvPlaylist.layoutManager = manager

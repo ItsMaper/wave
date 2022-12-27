@@ -4,17 +4,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/main"
+    android:background="@drawable/home_gradient2"
     tools:context=".activities.PlayerActivity">
 
     <com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
         android:id="@+id/ytpl"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toTopOf="parent"
-        app:layout_constraintEnd_toStartOf="parent"
         app:enableAutomaticInitialization="false"
-        />
+        app:layout_constraintBottom_toTopOf="parent"
+        app:layout_constraintEnd_toStartOf="parent" />
 
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/player_thumbnail"
@@ -31,20 +30,24 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
+        android:gravity="center_horizontal"
+        android:maxLines="2"
         android:textAlignment="center"
         android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
         android:textColor="@color/white"
         app:layout_constraintBottom_toTopOf="@+id/player_publisher"
         app:layout_constraintEnd_toEndOf="parent"
+
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         tools:text="@tools:sample/full_names" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/player_publisher"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
+        android:gravity="center_horizontal"
         android:textColor="@color/white"
         app:layout_constraintBottom_toTopOf="@+id/seek_layout"
         app:layout_constraintEnd_toEndOf="@+id/player_title"
@@ -85,8 +88,8 @@
         android:id="@+id/PPlaylistLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="-60dp"
-        android:background="@color/main"
+        android:layout_marginTop="-55dp"
+        android:background="@drawable/nav_rounded_borders"
         android:orientation="vertical"
         android:translationZ="2dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -95,30 +98,35 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            >
+            android:layout_height="match_parent">
 
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/currentWavelistText"
                 android:layout_width="wrap_content"
-                android:layout_marginTop="5dp"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
                 android:gravity="end"
                 android:text="@string/queue"
                 android:textColor="@color/white"
                 android:textSize="16sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"/>
 
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/queueText"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center_vertical"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginEnd="10dp"
+                android:gravity="center"
+                android:maxLines="1"
                 android:textColor="@color/white"
-                app:layout_constraintEnd_toEndOf="@+id/currentWavelistText"
-                app:layout_constraintStart_toStartOf="@+id/currentWavelistText"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/currentWavelistText"
                 tools:text="1/24" />
 
@@ -127,8 +135,8 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_PPlaylist"
             android:layout_width="match_parent"
-            android:layout_marginTop="5dp"
             android:layout_height="0dp"
+            android:layout_marginTop="5dp"
             android:layout_weight="1"
             android:translationZ="1dp" />
     </LinearLayout>
@@ -147,7 +155,7 @@
             android:id="@+id/current_time_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="5dp"
+            android:layout_marginStart="10dp"
             android:layout_weight="0"
             android:maxLines="1"
             android:textColor="@color/white"
@@ -170,7 +178,7 @@
             android:id="@+id/timeText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="5dp"
+            android:layout_marginEnd="10dp"
             android:layout_weight="0"
             android:maxLines="1"
             android:textColor="@color/white"
@@ -184,39 +192,40 @@
         android:id="@+id/controls_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="10dp"
         android:orientation="horizontal"
-        android:layout_marginEnd="10dp"
-        android:layout_marginStart="10dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toTopOf="@id/PPlaylistLayout"
-        tools:layout_editor_absoluteY="802dp">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
 
         <androidx.appcompat.widget.AppCompatImageButton
             android:id="@+id/player_prev"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="2"
-            android:backgroundTint="@color/main"
+            android:layout_weight="1"
+            android:backgroundTint="@android:color/transparent"
             android:contentDescription="@string/player_prev"
-            tools:ignore="TouchTargetSizeCheck" />
+            tools:ignore="TouchTargetSizeCheck,ImageContrastCheck" />
 
         <androidx.appcompat.widget.AppCompatImageButton
             android:id="@+id/player_play"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:backgroundTint="@color/main"
+            android:backgroundTint="@android:color/transparent"
             android:contentDescription="@string/player_play"
-            tools:ignore="TouchTargetSizeCheck" />
+            tools:ignore="TouchTargetSizeCheck,ImageContrastCheck" />
 
         <androidx.appcompat.widget.AppCompatImageButton
             android:id="@+id/player_next"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="2"
-            android:backgroundTint="@color/main"
-            android:contentDescription="@string/player_next" tools:ignore="TouchTargetSizeCheck" />
+            android:layout_weight="1"
+            android:backgroundTint="@android:color/transparent"
+            android:contentDescription="@string/player_next"
+            tools:ignore="TouchTargetSizeCheck,ImageContrastCheck" />
     </LinearLayout>
 
     <com.google.android.gms.ads.AdView

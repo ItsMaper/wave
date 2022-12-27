@@ -23,9 +23,6 @@ class HomeViewModel : ViewModel() {
     var nextPageToken: String? = null
     var querySearch: String? = null
 
-    init { getOnlineList() }
-
-
     fun getOnlineList(){
         _isLoading.value = true
         val client = YTApiConfig
