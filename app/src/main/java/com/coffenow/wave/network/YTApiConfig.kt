@@ -23,6 +23,7 @@ class YTApiConfig {
                         .request()
                         .url
                         .newBuilder()
+                        .addQueryParameter("videoEmbeddable", "true")
                         .addQueryParameter("key", BuildConfig.YOUTUBE_API_KEY)
                         .build()
                     chain.proceed(chain.request().newBuilder().url(url).build())

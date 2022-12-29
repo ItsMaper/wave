@@ -23,9 +23,9 @@
             android:layout_height="wrap_content">
 
             <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/thumbnail"
-                android:layout_width="110dp"
-                android:layout_height="70dp"
+                android:id="@+id/playlist_thumbnail"
+                android:layout_width="80dp"
+                android:layout_height="65dp"
                 android:layout_margin="10dp"
                 android:contentDescription="@string/video_thumbnail"
                 android:scaleType="centerCrop"
@@ -35,30 +35,31 @@
                 tools:srcCompat="@tools:sample/backgrounds/scenic" />
 
             <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/tv_playlist_title"
+                android:id="@+id/playlist_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="58pt"
-                android:layout_marginTop="15dp"
+                android:layout_marginStart="45pt"
+                android:layout_marginTop="8dp"
                 android:layout_marginEnd="10dp"
                 android:ellipsize="end"
                 android:textColor="@color/white"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/thumbnail"
-                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/playlist_thumbnail"
+                app:layout_constraintTop_toTopOf="@+id/playlist_thumbnail"
+                tools:ignore="TouchTargetSizeCheck"
                 tools:text="@tools:sample/full_names" />
 
             <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/tv_video_count"
+                android:id="@+id/playlist_count"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="58pt"
+                android:layout_marginStart="45pt"
                 android:layout_marginTop="5dp"
                 android:layout_marginEnd="10dp"
                 android:textColor="@color/white"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/tv_playlist_title"
+                app:layout_constraintTop_toBottomOf="@+id/playlist_title"
                 tools:text="8 Videos" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>

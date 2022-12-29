@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName
 
 @Keep
 data class YTModelThumbnails(
-    @SerializedName("high")
+    @SerializedName("medium")
     val high: High
 ) {
     data class High(

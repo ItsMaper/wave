@@ -2,10 +2,11 @@ package com.coffenow.wave.activities
 
 import android.annotation.SuppressLint
 import android.app.*
+import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.drawable.Drawable
+import android.database.Cursor
+import android.database.sqlite.SQLiteDatabase
 import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.os.Bundle
@@ -16,30 +17,29 @@ import android.view.View.VISIBLE
 import android.widget.AbsListView
 import android.widget.ImageButton
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.SeekBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
-import androidx.core.view.size
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.bumptech.glide.request.target.CustomTarget
-import com.bumptech.glide.request.transition.Transition
 import com.coffenow.wave.R
 import com.coffenow.wave.activities.viewmodel.PlayerViewModel
 import com.coffenow.wave.adapter.PlayerPlaylistAdapter
+import com.coffenow.wave.adapter.RecyclerPlayerPlaylistByDB
 import com.coffenow.wave.databinding.ActivityPlayerBinding
-import com.coffenow.wave.services.OnBackPlayer
+import com.coffenow.wave.db.WaveDBHelper
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.MobileAds
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.PlayerConstants
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.YouTubePlayerListener
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.options.IFramePlayerOptions
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
+import kotlinx.coroutines.*
 
 
 class PlayerActivity : AppCompatActivity(), YouTubePlayerListener {
@@ -48,20 +48,26 @@ class PlayerActivity : AppCompatActivity(), YouTubePlayerListener {
     private val binding get() = _binding!!
     private var playerViewModel:PlayerViewModel?=null
     private val playlistAdapter=PlayerPlaylistAdapter()
-    private lateinit var rvPLaylist: RecyclerView
+    private lateinit var dbHelper: WaveDBHelper
+    private lateinit var db: SQLiteDatabase
+    private lateinit var ytpl: YouTubePlayerView
+    private lateinit var rvPlaylist: RecyclerView
     private lateinit var playerTitle: TextView
     private lateinit var playerPublisher: TextView
     private lateinit var playerThumbnail: ImageView
     private lateinit var playBtn:ImageButton
     private lateinit var prevBtn:ImageButton
     private lateinit var nextBtn:ImageButton
+    private lateinit var bucleBtn:ImageButton
+    private lateinit var shuffleBtn:ImageButton
     private lateinit var mediaPlayer: MediaPlayer
     private lateinit var seekBar: SeekBar
     private lateinit var timeTotal : TextView
     private lateinit var currentTime : TextView
     private lateinit var notificationStyle: Notification
-    private lateinit var pPlaylistLayout: LinearLayout
+    private lateinit var PlaylistLayout: ConstraintLayout
     private lateinit var queueText: TextView
+    private var isPlaylist = "Default"
     private val notificationStyleID = 0
     private val channelName = "channelName"
     private val channelId = "channelId"
@@ -74,10 +80,10 @@ class PlayerActivity : AppCompatActivity(), YouTubePlayerListener {
     private var currentItem = -1
     private var totalItem = -1
     private var scrollOutItem = -1
-    private var isAllVideoLoaded = false
     private var isPlaylistFullScreen = false
     private var isFirst = true
     private var first = true
+    private var fromAutoPlay = false
 
     companion object {
         const val INTENT_REQUEST = 0
@@ -95,8 +101,14 @@ class PlayerActivity : AppCompatActivity(), YouTubePlayerListener {
         supportActionBar?.hide()
         setterBind()
         val type:String= intent.getStringExtra("type").toString()
-        if (type=="local") setLocalPlayer() else if(type == "web") setWebPlayer()
-        initRecyclerView()
+        val playlist:String = intent.getStringExtra("playlist").toString()
+        if(type == "web") {
+            if (playlist == "default"){
+                initWebPlaylist()
+                setWebPlayer()
+            } else{initDBPlaylist(playlist)}
+        }
+
         //playerNotification()
         //val notifManager = NotificationManagerCompat.from(this)
         //notifManager.notify(notificationStyleID, notificationStyle)
@@ -109,8 +121,10 @@ class PlayerActivity : AppCompatActivity(), YouTubePlayerListener {
         adView.loadAd(adRequest)
     }
     private fun setterBind() {
-        binding.ytpl.visibility = INVISIBLE
-        rvPLaylist = binding.rvPPlaylist
+        dbHelper = WaveDBHelper(this)
+        ytpl = binding.ytpl
+        ytpl.visibility = INVISIBLE
+        rvPlaylist = binding.rvPPlaylist
         playerTitle = binding.playerTitle
         playerPublisher = binding.playerPublisher
         queueText = binding.queueText
@@ -118,10 +132,12 @@ class PlayerActivity : AppCompatActivity(), YouTubePlayerListener {
         playBtn = binding.playerPlay
         prevBtn = binding.playerPrev
         nextBtn = binding.playerNext
+        bucleBtn=binding.playerBucle
+        shuffleBtn=binding.playerShuffle
         seekBar = binding.playerSeek
         timeTotal = binding.timeText
         currentTime = binding.currentTimeText
-        pPlaylistLayout = binding.PPlaylistLayout
+        PlaylistLayout = binding.PPlaylistLayout
         playBtn.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
         prevBtn.setImageResource(R.drawable.ic_baseline_arrow_back_ios_24)
         nextBtn.setImageResource(R.drawable.ic_baseline_arrow_forward_ios_24)
@@ -148,16 +164,53 @@ class PlayerActivity : AppCompatActivity(), YouTubePlayerListener {
     }
 
 
+    private fun initDBPlaylist(playlistName: String){
+        db = dbHelper.readableDatabase
+        val dbAdapter = RecyclerPlayerPlaylistByDB()
+        val cursor: Cursor = db.rawQuery(
+            "SELECT * FROM $playlistName",null
+        )
+        dbAdapter.rvSet(this, cursor)
+        val manager = LinearLayoutManager(this)
+        rvPlaylist.apply {
+            layoutManager = manager
+            adapter = dbAdapter
+        }
+        dbAdapter.addListener = RecyclerPlayerPlaylistByDB.ItemClickListener { data ->
+            data.id.let { id ->
+                id?.let {
+                    youtubePlayer?.loadVideo(it, 0f)
+                }
+            }
+            dbSearchesUpdater(
+                data.id,
+                data.name,
+                data.channelName,
+                data.thumb
+            )
+            playerTitle.text = data.name
+            playerPublisher.text = data.channelName
+            queueText.text = data.name
+            Glide.with(binding.root)
+                .load(data.thumb)
+                .dontAnimate()
+                .dontTransform()
+                .into(playerThumbnail)
+        }
+
+        }
+
+
     @SuppressLint("SetTextI18n")
-    private fun initRecyclerView() {
+    private fun initWebPlaylist() {
         playerViewModel?.relatedTo = intent.getStringExtra("id")
         playerViewModel?.getPlayerlist()
 
-        val manager = LinearLayoutManager(this)
-        rvPLaylist.apply {
+        val manager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+        rvPlaylist.apply {
             adapter = playlistAdapter
             layoutManager = manager
-            binding.queueText.text="8 Songs"
+            binding.queueText.text="Songs"
             addOnScrollListener(object :RecyclerView.OnScrollListener(){
                 override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                     super.onScrollStateChanged(recyclerView, newState)
@@ -170,15 +223,14 @@ class PlayerActivity : AppCompatActivity(), YouTubePlayerListener {
                     scrollOutItem = manager.findFirstVisibleItemPosition()
                     if (isScroll && (currentItem + scrollOutItem == totalItem)){
                         isScroll = false
-                        if (!isLoading && totalItem<=23){
-                            playerViewModel?.getPlayerlist() } } } } )}
-
-
+                        if (!isLoading && totalItem<=12){
+                            playerViewModel?.getPlayerlist() } } } } ) }
 
         playlistAdapter.addListener = PlayerPlaylistAdapter.ItemClickListener { data ->
             data.videoId.videoID.let { id ->
-                id?.let { youtubePlayer?.loadVideo(it, 0f) }
-            }
+                id?.let { youtubePlayer?.loadVideo(it, 0f)
+                    } }
+            dbSearchesUpdater(data.videoId.videoID,data.snippet.title,data.snippet.channelTitle,data.snippet.thumbnails.high.url)
             playerTitle.text = data.snippet.title
             playerPublisher.text = data.snippet.channelTitle
             queueText.text = data.snippet.title
@@ -189,19 +241,23 @@ class PlayerActivity : AppCompatActivity(), YouTubePlayerListener {
                 .into(playerThumbnail)
         }
 
-        playerViewModel?.playList_data?.observe(this) {
+        playerViewModel?.playlistData?.observe(this) {
             it?.items?.get(0)?.videoId?.videoID?.let { it1 ->
-                playlistAdapter.setDataDiff(it.items, rvPLaylist)
+                playlistAdapter.setDataDiff(it.items, rvPlaylist)
             }
         }
-        pPlaylistLayout.setOnClickListener {
+        PlaylistLayout.setOnClickListener {
             if (isPlaylistFullScreen){
                 it.translationY = 0F
                 isPlaylistFullScreen = false
+                bucleBtn.visibility = VISIBLE
+                shuffleBtn.visibility = VISIBLE
                 queueText.text = "$totalItem Songs"
             }else{
-                it.translationY = -(binding.root.height-(playerThumbnail.height*1.5)).toFloat()
+                it.translationY = -(binding.root.height-(playerThumbnail.height*1.8)).toFloat()
                 isPlaylistFullScreen = true
+                bucleBtn.visibility = INVISIBLE
+                shuffleBtn.visibility = INVISIBLE
                 queueText.text = binding.playerTitle.text
             }
         }
@@ -239,6 +295,156 @@ class PlayerActivity : AppCompatActivity(), YouTubePlayerListener {
                 }}
         }
     }
+
+
+    //WEB!
+    private fun setWebPlayer() {
+        playerPublisher.visibility = VISIBLE
+        if (isFirst){
+            playerTitle.text = intent.getStringExtra("title")
+            playerPublisher.text = intent.getStringExtra("publisher")
+            Glide.with(binding.root)
+                .load(intent.getStringExtra("thumbnail"))
+                .into(playerThumbnail)
+
+            isFirst=false
+        }
+        nextBtn.setOnClickListener {webQueueManagement(true)}
+        prevBtn.setOnClickListener {webQueueManagement(false)}
+        val opts = IFramePlayerOptions.Builder()
+            .controls(0)
+            .rel(0)
+            .ivLoadPolicy(3)
+            .ccLoadPolicy(3)
+            .build()
+        ytpl.initialize(this, false, opts)
+        ytpl.enableBackgroundPlayback(true)
+    }
+
+    private fun dbSearchesUpdater(id: String?, name:String?, publisher:String?, thumb:String?){
+        if(!id.isNullOrEmpty() && !name.isNullOrEmpty() && !publisher.isNullOrEmpty() && !thumb.isNullOrEmpty() ){
+            val data = ContentValues()
+            data.put("videoID",id)
+            data.put("name", name)
+            data.put("publisher", publisher)
+            data.put("thumbURL", thumb)
+            dbHelper.addData("searches", data)
+        }
+    }
+
+    private fun setWebSeekBar(){
+        seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener{
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+            if(fromUser){
+                youtubePlayer?.seekTo(progress.toFloat())
+            }else{
+                if (seekBar?.progress  == seekBar?.max){
+                    webQueueManagement(true) } }}
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {} } )
+
+    }
+    private fun webQueueManagement(isNext : Boolean) {
+        var currentQueue = playlistAdapter.currentSelected
+        var key = true
+        seekBar.progress=0
+        currentTime.text= "00:00"
+        playerViewModel?.playlistData?.observe(this) {
+            if (currentQueue != null) {
+                if (isNext){
+                    if(currentQueue>=0 && !first){
+                        currentQueue+=1
+                    }
+                    first=false
+                    playlistAdapter.currentSelected = currentQueue
+                } else{
+                    if (currentQueue >0) {
+                        currentQueue-=1
+                    }else{
+                        playerTitle.text = intent.getStringExtra("title")
+                        playerPublisher.text = intent.getStringExtra("publisher")
+                        youtubePlayer?.loadVideo(intent.getStringExtra("id")!!, 0f)
+                        Glide.with(binding.root)
+                            .load(intent.getStringExtra("thumbnail"))
+                            .into(playerThumbnail)
+                        first=true
+                        key =false
+                    }
+                    playlistAdapter.currentSelected = currentQueue
+                }
+                if(key){
+                    it?.items?.get(currentQueue)?.videoId?.videoID?.let { it1 ->
+                        youtubePlayer?.loadVideo(it1, 0f)
+                    }
+                    dbSearchesUpdater(it?.items?.get(currentQueue)?.videoId?.videoID,it?.items?.get(currentQueue)?.snippet?.title,it?.items?.get(currentQueue)?.snippet?.channelTitle,it?.items?.get(currentQueue)?.snippet?.thumbnails?.high?.url)
+                    playerTitle.text = it?.items?.get(currentQueue)?.snippet?.title
+                    playerPublisher.text = it?.items?.get(currentQueue)?.snippet?.channelTitle
+                    Glide.with(binding.root)
+                        .load(it?.items?.get(currentQueue)?.snippet?.thumbnails?.high?.url)
+                        .dontAnimate()
+                        .dontTransform()
+                        .into(playerThumbnail)
+                }
+                if (isPlaylistFullScreen){
+                    queueText.text=playerTitle.text
+                }
+            }
+        }
+    }
+
+
+    override fun onReady(youTubePlayer: YouTubePlayer) {
+        val videoId = intent.getStringExtra("id")
+        videoId?.let {
+            youTubePlayer.loadVideo(it, 0f)
+        }
+        this.youtubePlayer =youTubePlayer
+        setWebSeekBar()
+    }
+
+    override fun onCurrentSecond(youTubePlayer: YouTubePlayer, second: Float) {
+        curTime=second
+        seekBar.progress = curTime.toInt()
+        currentTime.text = formatTime(second.toInt())
+    }
+
+    override fun onVideoDuration(youTubePlayer: YouTubePlayer, duration: Float) {
+        maxTime = duration
+        seekBar.max= maxTime.toInt()
+        timeTotal.text= formatTime(duration.toInt())
+    }
+
+    override fun onStateChange(youTubePlayer: YouTubePlayer, state: PlayerConstants.PlayerState) {
+        isPlaying = if (state == PlayerConstants.PlayerState.PLAYING ){
+            playBtn.setImageResource(R.drawable.ic_baseline_motion_photos_paused_24)
+            true
+        } else {
+            playBtn.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
+            if(fromAutoPlay){
+                youTubePlayer.play()
+            }
+            false
+        }
+        playBtn.setOnClickListener{
+            if(state == PlayerConstants.PlayerState.PLAYING){
+                youTubePlayer.pause()
+                playBtn.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
+            } else if(state==PlayerConstants.PlayerState.PAUSED){
+                playBtn.setImageResource(R.drawable.ic_baseline_motion_photos_paused_24)
+                youTubePlayer.play()
+            }
+        }
+    }
+
+
+
+    override fun onVideoId(youTubePlayer: YouTubePlayer, videoId: String) {}
+    override fun onVideoLoadedFraction(youTubePlayer: YouTubePlayer, loadedFraction: Float) {}
+    override fun onPlaybackQualityChange(youTubePlayer: YouTubePlayer, playbackQuality: PlayerConstants.PlaybackQuality) {}
+    override fun onPlaybackRateChange(youTubePlayer: YouTubePlayer, playbackRate: PlayerConstants.PlaybackRate) {}
+    override fun onApiChange(youTubePlayer: YouTubePlayer) {}
+    override fun onError(youTubePlayer: YouTubePlayer, error: PlayerConstants.PlayerError) {}
+
 
     private fun setLocalPlayer() {
         binding.playerPublisher.visibility = INVISIBLE
@@ -302,144 +508,32 @@ class PlayerActivity : AppCompatActivity(), YouTubePlayerListener {
         }
     }
 
-    //WEB!
-    private fun setWebPlayer() {
-        playerPublisher.visibility = VISIBLE
-        if (isFirst){
-            playerTitle.text = intent.getStringExtra("title")
-            playerPublisher.text = intent.getStringExtra("publisher")
-            Glide.with(binding.root)
-                .load(intent.getStringExtra("thumbnail"))
-                .into(playerThumbnail)
 
-            isFirst=false
-        }
-        nextBtn.setOnClickListener {webQueueManagement(true)}
-        prevBtn.setOnClickListener {webQueueManagement(false)}
-        val opts = IFramePlayerOptions.Builder()
-            .controls(0)
-            .rel(0)
-            .ivLoadPolicy(3)
-            .ccLoadPolicy(3)
-            .build()
-
-        val ytpl = binding.ytpl
-        ytpl.initialize(this, false, opts)
-        ytpl.enableBackgroundPlayback(true)
-    }
-
-    private fun setWebSeekBar(){
-        seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener{
-            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-            if(fromUser){
-                youtubePlayer?.seekTo(progress.toFloat())
-            }else{
-                if (seekBar?.progress  == seekBar?.max){
-                    webQueueManagement(true) } }}
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
-            override fun onStopTrackingTouch(seekBar: SeekBar?) {} } )
-
-    }
-    private fun webQueueManagement(isNext : Boolean) {
-        var currentQueue = playlistAdapter.currentSelected
-        var key = true
-        seekBar.progress=0
-        playerViewModel?.playList_data?.observe(this) {
-            if (currentQueue != null) {
-                if (isNext){
-                    if(currentQueue>=0 && !first){
-                        currentQueue+=1
-                    }else {first = false}
-                    playlistAdapter.currentSelected = currentQueue
-                } else{
-                    if (currentQueue >0) {
-                        currentQueue-=1
-                    }else{
-                        playerTitle.text = intent.getStringExtra("title")
-                        playerPublisher.text = intent.getStringExtra("publisher")
-                        youtubePlayer?.loadVideo(intent.getStringExtra("id")!!, 0f)
-                        Glide.with(binding.root)
-                            .load(intent.getStringExtra("thumbnail"))
-                            .into(playerThumbnail)
-                        key =false
-                    }
-                    playlistAdapter.currentSelected = currentQueue
-                }
-                if(key){
-                    it?.items?.get(currentQueue)?.videoId?.videoID?.let { it1 ->
-                        youtubePlayer?.loadVideo(it1, 0f)
-                    }
-                    playerTitle.text = it?.items?.get(currentQueue)?.snippet?.title
-                    playerPublisher.text = it?.items?.get(currentQueue)?.snippet?.channelTitle
-                    Glide.with(binding.root)
-                        .load(it?.items?.get(currentQueue)?.snippet?.thumbnails?.high?.url)
-                        .dontAnimate()
-                        .dontTransform()
-                        .into(playerThumbnail)
-                }
-                if (isPlaylistFullScreen){
-                    queueText.text=playerTitle.text
-                }
+    private fun onBackground(): Boolean {
+        while (true){
+            if (seekBar.progress+1 >= seekBar.max){
+                return true
             }
         }
     }
 
-
-    override fun onReady(youTubePlayer: YouTubePlayer) {
-        val videoId = intent.getStringExtra("id")
-        videoId?.let {
-            youTubePlayer.loadVideo(it, 0f)
-        }
-        this.youtubePlayer =youTubePlayer
-        setWebSeekBar()
+    override fun onResume() {
+        super.onResume()
+        fromAutoPlay=false
     }
-
-    override fun onCurrentSecond(youTubePlayer: YouTubePlayer, second: Float) {
-        curTime=second
-        seekBar.progress = curTime.toInt()
-        currentTime.text = formatTime(second.toInt())
-    }
-
-    override fun onVideoDuration(youTubePlayer: YouTubePlayer, duration: Float) {
-        maxTime = duration
-        seekBar.max= maxTime.toInt()
-        timeTotal.text= formatTime(duration.toInt())
-    }
-
-    override fun onStateChange(youTubePlayer: YouTubePlayer, state: PlayerConstants.PlayerState) {
-        isPlaying = if (state == PlayerConstants.PlayerState.PLAYING ){
-            playBtn.setImageResource(R.drawable.ic_baseline_motion_photos_paused_24)
-            true
-        } else {
-            playBtn.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
-            false
-        }
-        playBtn.setOnClickListener{
-            if(state == PlayerConstants.PlayerState.PLAYING){
-                youTubePlayer.pause()
-                playBtn.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
-            } else if(state==PlayerConstants.PlayerState.PAUSED){
-                playBtn.setImageResource(R.drawable.ic_baseline_motion_photos_paused_24)
-                youTubePlayer.play()
-            }
-        }
-    }
-
-    override fun onVideoId(youTubePlayer: YouTubePlayer, videoId: String) {}
-    override fun onVideoLoadedFraction(youTubePlayer: YouTubePlayer, loadedFraction: Float) {}
-    override fun onPlaybackQualityChange(youTubePlayer: YouTubePlayer, playbackQuality: PlayerConstants.PlaybackQuality) {}
-    override fun onPlaybackRateChange(youTubePlayer: YouTubePlayer, playbackRate: PlayerConstants.PlaybackRate) {}
-    override fun onApiChange(youTubePlayer: YouTubePlayer) {}
-    override fun onError(youTubePlayer: YouTubePlayer, error: PlayerConstants.PlayerError) {}
-
     override fun onStop() {
         super.onStop()
-        val i =Intent(this, OnBackPlayer::class.java)
-        i.putExtra("max", maxTime)
-        i.putExtra("current", curTime)
-        startService(i)
+        fromAutoPlay=true
+        GlobalScope.launch {
+            if (withContext(Dispatchers.Default){onBackground()}){
+                withContext(Dispatchers.Main){webQueueManagement(true)}
+                } }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        ytpl.release()
+    }
 }
 
 

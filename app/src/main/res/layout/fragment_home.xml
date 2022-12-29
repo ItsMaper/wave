@@ -10,7 +10,7 @@
 
 
     <androidx.appcompat.widget.SearchView
-        android:id="@+id/searchView"
+        android:id="@+id/sv_music"
         android:layout_width="match_parent"
         android:layout_height="35dp"
         android:layout_marginStart="50dp"
@@ -20,6 +20,7 @@
         android:focusable="false"
         android:focusableInTouchMode="true"
         android:searchIcon="@drawable/ic_baseline_search_24"
+        android:translationZ="1dp"
         app:iconifiedByDefault="false"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -30,25 +31,17 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_online_music"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="2dp"
+        android:layout_height="match_parent"
+        android:layout_marginTop="45dp"
         android:fadingEdge="vertical"
         android:textAlignment="center"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/searchView">
+        app:layout_constraintTop_toBottomOf="@+id/sv_music">
 
     </androidx.recyclerview.widget.RecyclerView>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_local_music"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="2dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/searchView" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

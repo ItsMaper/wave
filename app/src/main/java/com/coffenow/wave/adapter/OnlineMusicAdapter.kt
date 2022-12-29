@@ -31,6 +31,7 @@ class OnlineMusicAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             binding.root.setOnClickListener {
                 val i = Intent(it.context, PlayerActivity::class.java)
                 i.putExtra("type", "web")
+                i.putExtra("playlist","default")
                 i.putExtra("thumbnail", data.snippet.thumbnails.high.url)
                 i.putExtra("title", data.snippet.title)
                 i.putExtra("publisher", data.snippet.channelTitle)
@@ -63,4 +64,6 @@ class OnlineMusicAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         notifyDataSetChanged()
     }
 }
+
+
 

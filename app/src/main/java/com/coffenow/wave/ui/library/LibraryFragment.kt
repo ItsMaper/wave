@@ -1,33 +1,45 @@
 package com.coffenow.wave.ui.library
 
+import android.content.ContentValues
+import android.content.Context
+import android.database.Cursor
+import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.*
 import android.view.ViewGroup
-import android.widget.AbsListView
+import android.widget.Button
+import android.widget.EditText
+import android.widget.FrameLayout
+import android.widget.ImageButton
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.coffenow.wave.adapter.PlaylistAdapter
+import com.coffenow.wave.R
+import com.coffenow.wave.adapter.RecyclerPlaylistByDB
 import com.coffenow.wave.databinding.FragmentLibraryBinding
+import com.coffenow.wave.db.WaveDBHelper
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.MobileAds
+
 
 class LibraryFragment : Fragment() {
 
     private var _binding: FragmentLibraryBinding? = null
     private val binding get() = _binding!!
     private var playlistViewModel: LibraryViewModel? = null
-    private val adapter = PlaylistAdapter()
-    private var isLoading = false
-    private var isScroll = false
-    private var currentItem = -1
-    private var totalItem = -1
-    private var scrollOutItem = -1
-    private var isAllVideoLoaded = false
+    private lateinit var appContext : Context
+    private lateinit var dbHelper: WaveDBHelper
+    private lateinit var db: SQLiteDatabase
+    private lateinit var rvPlaylists: RecyclerView
+    private lateinit var createPanel: FrameLayout
+    private lateinit var saveBtn :Button
+    private lateinit var inputEditText: EditText
+    private lateinit var addBtn: ImageButton
+
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         playlistViewModel = ViewModelProvider(this)[LibraryViewModel::class.java]
@@ -37,43 +49,64 @@ class LibraryFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initAdsView()
+        setBinding()
         initRecyclerView()
+        createList()
+        initAdsView()
          }
 
-    private fun initRecyclerView() {
-        val manager = LinearLayoutManager(requireContext())
-        binding.rvPlaylist.adapter = adapter
-        binding.rvPlaylist.layoutManager = manager
-        binding.rvPlaylist.addOnScrollListener(object : RecyclerView.OnScrollListener(){
-            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                super.onScrollStateChanged(recyclerView, newState)
-                if (newState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL){
-                    isScroll = true
-                }
+    private fun setBinding(){
+        appContext= requireContext().applicationContext
+        createPanel = binding.newPlaylistPanel
+        createPanel.visibility = INVISIBLE
+        inputEditText = binding.playlistName
+        inputEditText.hint = "Name"
+        dbHelper = WaveDBHelper(appContext)
+        rvPlaylists = binding.rvPlaylist
+        addBtn= binding.newList
+        saveBtn = binding.saveBtn
+    }
+
+    private fun createList() {
+        db = dbHelper.readableDatabase
+        addBtn.setOnClickListener{
+            addBtn.visibility = INVISIBLE
+            createPanel.visibility = VISIBLE
+        }
+        saveBtn.setOnClickListener{
+            createPanel.visibility = INVISIBLE
+            if(inputEditText.text.isNotEmpty()){
+                val playlistName: String = inputEditText.text.toString()
+                dbHelper.createPlaylist(playlistName)
+                val data = ContentValues()
+                data.put("name", playlistName)
+                db.insert("playlists", null, data)
+                inputEditText.setText("")
+                inputEditText.hint = "Name"
+                addBtn.visibility = VISIBLE
+                initRecyclerView()
+            } else{
+                Toast.makeText(appContext, R.string.isEmpty, Toast.LENGTH_SHORT).show()
+                addBtn.visibility = VISIBLE
             }
+        }
 
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                super.onScrolled(recyclerView, dx, dy)
-                currentItem = manager.childCount
-                totalItem = manager.itemCount
-                scrollOutItem = manager.findFirstVisibleItemPosition()
-                if (isScroll && (currentItem + scrollOutItem == totalItem)){
-                    isScroll = false
-                    if (!isLoading){
-                        if (!isAllVideoLoaded){
-                            playlistViewModel?.getPlaylist()
-                        } else {
-                            Toast.makeText(requireContext(), "All playlist loaded", Toast.LENGTH_SHORT).show()
-                        } } } } })
+    }
 
-        playlistViewModel?.playlist?.observe(viewLifecycleOwner) {
-            adapter.setDataDiff(it?.items!!, binding.rvPlaylist)
-            it.nextPageToken?.let { token ->
-                Log.e("next page token", token) } }
 
-        playlistViewModel?.isAllPlaylistLoaded?.observe(viewLifecycleOwner) {
-            isAllVideoLoaded = it }
+
+    private fun initRecyclerView() {
+        db = dbHelper.readableDatabase
+        val dbAdapter = RecyclerPlaylistByDB()
+        val cursor: Cursor = db.rawQuery(
+            "SELECT * FROM playlists",null
+        )
+        dbAdapter.rvSet(appContext, cursor)
+        val manager = LinearLayoutManager(requireContext())
+        binding.rvPlaylist.apply {
+            layoutManager = manager
+            adapter = dbAdapter
+        }
     }
 
     private fun initAdsView() {

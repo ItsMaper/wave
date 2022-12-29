@@ -1,9 +1,13 @@
 <resources>
     <string name="app_name" translatable="false">Wave</string>
+    <!--ACTIVITIES & FRAGMENTS-->
     <string name="title_home">Home</string>
     <string name="title_user">User</string>
     <string name="title_library">Library</string>
+
+    <!--Views-->
     <string name="search_bar">Music</string>
+    <string name="addPlaylist">Create new Wave playlist</string>
     <string name="video_thumbnail">listThumbnail</string>
     <string name="download_btn">Download</string>
     <string name="player_play">Play</string>
@@ -11,12 +15,17 @@
     <string name="player_next">Next</string>
     <string name="bucle_btn">playBucle</string>
     <string name="shuffle_btn">playShuffle</string>
-    <string name="queue">Current Wave</string>
-    <string name="DataMode">DataMode</string>
     <string name="new_playlist">new_playlist</string>
+
+    <!--FILLING TEXTS-->
     <string name="timer">00:00</string>
     <string name="empty"></string>
     <string name="local">Local</string>
     <string name="online">Online</string>
     <string name="current_unavailable">Current Unavailable</string>
+    <string name="isEmpty">Cannot set empty value</string>
+    <string name="queue">Current Wave</string>
+    <string name="DataMode">DataMode</string>
+    <string name="save">save</string>
+
 </resources>

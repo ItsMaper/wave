@@ -18,12 +18,12 @@ android {
 
     buildTypes {
         debug{
-            buildConfigField("String", "YOUTUBE_API_KEY", '"AIzaSyDGCoHcfTzRLhlDrh98H9cIUvRCZVrsByA"')
+            buildConfigField("String", "YOUTUBE_API_KEY", '"AIzaSyA2u9CJPkHtpMDRCyAPA-t0KsI6DyypEK8"')
         }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            buildConfigField("String", "YOUTUBE_API_KEY", '"AIzaSyDGCoHcfTzRLhlDrh98H9cIUvRCZVrsByA"')
+            buildConfigField("String", "YOUTUBE_API_KEY", '"AIzaSyA2u9CJPkHtpMDRCyAPA-t0KsI6DyypEK8"')
         }
     }
     compileOptions {

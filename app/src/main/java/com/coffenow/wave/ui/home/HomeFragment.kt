@@ -2,6 +2,8 @@ package com.coffenow.wave.ui.home
 
 import android.app.SearchManager
 import android.content.Context
+import android.database.Cursor
+import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
 import android.view.*
 import android.view.View.INVISIBLE
@@ -15,9 +17,10 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.coffenow.wave.R
-import com.coffenow.wave.adapter.LocalMusicAdapter
 import com.coffenow.wave.adapter.OnlineMusicAdapter
+import com.coffenow.wave.adapter.RecyclerSearchesByDB
 import com.coffenow.wave.databinding.FragmentHomeBinding
+import com.coffenow.wave.db.WaveDBHelper
 
 class HomeFragment : Fragment() {
 
@@ -25,7 +28,9 @@ class HomeFragment : Fragment() {
     private val binding get() = _binding!!
     private var viewModel: HomeViewModel? = null
     private val onlineAdapter = OnlineMusicAdapter()
-    private val localAdapter = LocalMusicAdapter()
+    private lateinit var dbHelper: WaveDBHelper
+    private lateinit var db:SQLiteDatabase
+    private lateinit var appContext : Context
     private var isLoading = false
     private var isScroll = false
     private var currentItem = -1
@@ -35,17 +40,10 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val appContext= requireContext().applicationContext
-        binding.rvLocalMusic.visibility = INVISIBLE
-        binding.rvOnlineMusic.visibility = INVISIBLE
-        setSearch()
-        initOnlineRecyclerView()
-        initLocalRecyclerView()
-        if (netState(appContext)){
-            binding.rvOnlineMusic.visibility= VISIBLE
-        }else{
-            binding.rvLocalMusic.visibility= VISIBLE
-        }
+        appContext= requireContext().applicationContext
+        dbHelper = WaveDBHelper(appContext)
+        OnlineData().start()
+
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -65,89 +63,92 @@ class HomeFragment : Fragment() {
                 return true } }
         return false }
 
-    private fun initLocalRecyclerView() {
-        val manager = LinearLayoutManager(requireContext())
-        binding.rvLocalMusic.apply {
-            adapter =localAdapter
-            layoutManager =manager
-            addOnScrollListener(object :RecyclerView.OnScrollListener(){
-                override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                    super.onScrollStateChanged(recyclerView, newState)
-                    if (newState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL){
-                        isScroll = true
-                        rvScrollState(manager.findFirstVisibleItemPosition()) }
-                    else{ rvStaticState()} }
-                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                    super.onScrolled(recyclerView, dx, dy)
-                    currentItem = manager.childCount
-                    totalItem = manager.itemCount
-                    scrollOutItem = manager.findFirstVisibleItemPosition() } }) }
+    inner class OnlineData {
+        fun start(){
+            setSearch()
+            if (dbHelper.isFilled("searches")){
+                initDBRecyclerView()
+            } else{initOnlineRecyclerView()}
+        }
+
+        private fun initDBRecyclerView() {
+            db = dbHelper.readableDatabase
+            val cursor:Cursor= db.rawQuery(
+                "SELECT * FROM searches",null
+            )
+            val dbAdapter = RecyclerSearchesByDB()
+            dbAdapter.rvSet(appContext, cursor)
+            val manager = LinearLayoutManager(requireContext())
+            binding.rvOnlineMusic.apply {
+                layoutManager = manager
+                adapter = dbAdapter
+            }
+        }
+
+        private fun initOnlineRecyclerView() {
+            viewModel?.querySearch= resources.getString(R.string.search_bar)
+            viewModel?.getOnlineList()
+            val manager = LinearLayoutManager(requireContext())
+            binding.rvOnlineMusic.apply {
+                adapter = onlineAdapter
+                layoutManager = manager
+                addOnScrollListener(object : RecyclerView.OnScrollListener(){
+                    override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                        super.onScrollStateChanged(recyclerView, newState)
+                        if (newState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL){
+                            isScroll = true
+                              }
+                        }
+                    override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                        super.onScrolled(recyclerView, dx, dy)
+                        currentItem = manager.childCount
+                        totalItem = manager.itemCount
+                        scrollOutItem = manager.findFirstVisibleItemPosition()
+
+                        if (isScroll && (currentItem + scrollOutItem == totalItem)){
+                            isScroll = false
+                            if (!isLoading && totalItem<=23){
+                                if (!isAllVideoLoaded){ viewModel?.getOnlineList() } } } } })
+                viewModel?.online_data?.observe(viewLifecycleOwner) {
+                    if (it != null && it.items.isNotEmpty()) {
+                        onlineAdapter.setDataDiff(it.items, binding.rvOnlineMusic,isScroll) } } }
+        }
+
+        private fun setSearch() {
+            val searchManager = requireActivity().getSystemService(Context.SEARCH_SERVICE) as SearchManager
+            val searchView = binding.svMusic
+            searchView.setSearchableInfo(searchManager.getSearchableInfo(requireActivity().componentName))
+            searchView.queryHint = resources.getString(R.string.search_bar)
+            searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+                override fun onQueryTextSubmit(q: String): Boolean {
+                    if (q.isNotEmpty()){
+                        viewModel?.querySearch = q
+                        viewModel?.nextPageToken = null
+                        onlineAdapter.clearAll()
+                        viewModel?.getOnlineList()
+                        searchView.clearFocus()
+                        binding.rvOnlineMusic.scrollToPosition(0)}
+                    return true }
+                override fun onQueryTextChange(newText: String): Boolean {
+                    if (newText.isEmpty()){
+                        viewModel?.nextPageToken = null
+                        onlineAdapter.clearAll()
+                        isScroll=false
+                        searchView.clearFocus()
+                        binding.rvOnlineMusic.scrollToPosition(0)
+                        start()}
+                    return false } }) }
     }
 
-    private fun initOnlineRecyclerView() {
-        viewModel?.querySearch= resources.getString(R.string.search_bar)
-        viewModel?.getOnlineList()
-        val manager = LinearLayoutManager(requireContext())
-        binding.rvOnlineMusic.apply {
-            adapter = onlineAdapter
-            layoutManager = manager
-            addOnScrollListener(object : RecyclerView.OnScrollListener(){
-                override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                    super.onScrollStateChanged(recyclerView, newState)
-                    if (newState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL){
-                        isScroll = true
-                        rvScrollState(manager.findFirstVisibleItemPosition()) }
-                    else{ rvStaticState()} }
-                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                    super.onScrolled(recyclerView, dx, dy)
-                    currentItem = manager.childCount
-                    totalItem = manager.itemCount
-                    scrollOutItem = manager.findFirstVisibleItemPosition()
-                    if (isScroll && (currentItem + scrollOutItem == totalItem)){
-                        isScroll = false
-                        if (!isLoading && totalItem<=23){
-                            if (!isAllVideoLoaded){ viewModel?.getOnlineList() } } } } })
-            viewModel?.online_data?.observe(viewLifecycleOwner) {
-                if (it != null && it.items.isNotEmpty()) {
-                    onlineAdapter.setDataDiff(it.items, binding.rvOnlineMusic,isScroll) } } }
+    private fun rvScrollItemsState(pos:Int) {
+        }
+
+
+
+    override fun onDestroy() {
+        super.onDestroy()
+        db.close()
     }
-
-    private fun setSearch() {
-        val searchManager = requireActivity().getSystemService(Context.SEARCH_SERVICE) as SearchManager
-        val searchView = binding.searchView
-        searchView.setSearchableInfo(searchManager.getSearchableInfo(requireActivity().componentName))
-        searchView.queryHint = resources.getString(R.string.search_bar)
-        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(q: String): Boolean {
-                if (q.isNotEmpty()){
-                    viewModel?.querySearch = q
-                    viewModel?.nextPageToken = null
-                    onlineAdapter.clearAll()
-                    viewModel?.getOnlineList()
-                    searchView.clearFocus()
-                binding.rvOnlineMusic.scrollToPosition(0)}
-                return true }
-            override fun onQueryTextChange(newText: String): Boolean {
-                if (newText.isEmpty()){
-                    viewModel?.querySearch = null
-                    viewModel?.nextPageToken = null
-                    onlineAdapter.clearAll()
-                    isScroll=false
-                    viewModel?.getOnlineList()
-                    searchView.clearFocus()
-                    binding.rvOnlineMusic.scrollToPosition(0)}
-                return false } }) }
-
-    private fun rvStaticState() {
-        binding.searchView.translationY=0F
-        binding.searchView.visibility= VISIBLE
-        if (scrollOutItem <= 1){
-            binding.rvOnlineMusic.translationY=0F }
-    }
-
-    private fun rvScrollState(pos: Int) {
-        if (pos>=1){binding.rvOnlineMusic.translationY=-100F
-            binding.searchView.visibility= INVISIBLE} }
 }
 
 

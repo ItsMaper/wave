@@ -18,7 +18,9 @@
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/player_thumbnail"
         android:layout_width="0dp"
-        android:layout_height="220dp"
+        android:layout_height="200dp"
+        android:layout_marginStart="20pt"
+        android:layout_marginEnd="20pt"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -56,90 +58,87 @@
         tools:text="@tools:sample/first_names" />
 
 
-    <androidx.appcompat.widget.AppCompatImageButton
-        android:id="@+id/player_shuffle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@color/main"
-        android:contentDescription="@string/shuffle_btn"
-        android:minWidth="60dp"
-        android:minHeight="60dp"
-        android:visibility="invisible"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/adView"
-        app:srcCompat="@drawable/ic_outline_shuffle_24"
-        tools:ignore="TouchTargetSizeCheck" />
-
-    <androidx.appcompat.widget.AppCompatImageButton
-        android:id="@+id/player_bucle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@color/main"
-        android:contentDescription="@string/bucle_btn"
-        android:minWidth="60dp"
-        android:minHeight="60dp"
-        android:visibility="invisible"
-        app:layout_constraintStart_toEndOf="@+id/player_shuffle"
-        app:layout_constraintTop_toTopOf="@+id/player_shuffle"
-        app:srcCompat="@drawable/ic_baseline_replay_24"
-        tools:ignore="TouchTargetSizeCheck" />
-
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/PPlaylistLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="-55dp"
+        android:layout_marginTop="-27pt"
         android:background="@drawable/nav_rounded_borders"
-        android:orientation="vertical"
-        android:translationZ="2dp"
+        android:translationZ="1dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="parent">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <androidx.appcompat.widget.AppCompatImageButton
+            android:id="@+id/player_shuffle"
+            android:layout_width="10pt"
+            android:layout_height="10pt"
+            android:layout_marginStart="5pt"
+            android:backgroundTint="@android:color/transparent"
+            android:contentDescription="@string/shuffle_btn"
+            android:tint="@android:color/darker_gray"
+            app:layout_constraintBottom_toBottomOf="@+id/queueText"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/currentWavelistText"
+            app:srcCompat="@drawable/ic_outline_shuffle_24"
+            tools:ignore="TouchTargetSizeCheck" />
+
+        <androidx.appcompat.widget.AppCompatImageButton
+            android:id="@+id/player_bucle"
+            android:layout_width="10pt"
+            android:layout_height="10pt"
+            android:layout_marginEnd="5pt"
+            android:backgroundTint="@android:color/transparent"
+            android:contentDescription="@string/bucle_btn"
+            android:tint="@android:color/darker_gray"
+            app:layout_constraintBottom_toBottomOf="@+id/queueText"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/currentWavelistText"
+            app:srcCompat="@drawable/ic_baseline_repeat_24"
+            tools:ignore="TouchTargetSizeCheck" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/currentWavelistText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="10dp"
+            android:gravity="end"
+            android:text="@string/queue"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/queueText"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/currentWavelistText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:gravity="end"
-                android:text="@string/queue"
-                android:textColor="@color/white"
-                android:textSize="16sp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                android:layout_marginStart="10dp"
-                android:layout_marginEnd="10dp"/>
-
-            <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/queueText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_marginTop="5dp"
-                android:layout_marginEnd="10dp"
-                android:gravity="center"
-                android:maxLines="1"
-                android:textColor="@color/white"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/currentWavelistText"
-                tools:text="1/24" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="10dp"
+            android:gravity="center"
+            android:maxLines="1"
+            android:textColor="@color/white"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/currentWavelistText"
+            tools:text="1/24" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_PPlaylist"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_marginTop="5dp"
-            android:layout_weight="1"
-            android:translationZ="1dp" />
-    </LinearLayout>
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:paddingBottom="2pt"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/queueText" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <LinearLayout
         android:id="@+id/seek_layout"
@@ -194,9 +193,9 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp"
-        android:layout_marginBottom="10dp"
+        android:layout_marginBottom="7dp"
         android:orientation="horizontal"
-        app:layout_constraintBottom_toTopOf="@id/PPlaylistLayout"
+        app:layout_constraintBottom_toTopOf="@+id/PPlaylistLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
@@ -230,7 +229,7 @@
 
     <com.google.android.gms.ads.AdView
         android:id="@+id/adView"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
