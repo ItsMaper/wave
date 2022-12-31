@@ -7,10 +7,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.coffenow.wave.databinding.PlayerItemPlaylistBinding
 import com.coffenow.wave.diffutils.PlaylistDiffUtil
-import com.coffenow.wave.model.YTModel
+import com.coffenow.wave.model.DBModel
 
 class PlayerPlaylistAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-    private val playerItems = ArrayList<YTModel.Items>()
+    private val playerItems = ArrayList<DBModel.Items>()
     var currentSelected: Int? = 0
     var addListener: ItemClickListener? = null
 
@@ -33,7 +33,7 @@ class PlayerPlaylistAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     inner class PPlaylistHolder(itemView: PlayerItemPlaylistBinding) : RecyclerView.ViewHolder(itemView.root){
         private val binding = itemView
 
-        fun setData(data: YTModel.Items, selected: Boolean,
+        fun setData(data: DBModel.Items, selected: Boolean,
                     function: (Int) -> Unit, position: Int) {
 
             binding.root.isSelected = selected
@@ -43,13 +43,13 @@ class PlayerPlaylistAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                     addListener?.onClick(data)
                 }
             }
-            binding.tvPpTitle.text = data.snippet.title
+            binding.tvPpTitle.text = data.title
             Glide.with(binding.root)
-                .load(data.snippet.thumbnails.high.url)
+                .load(data.thumb)
                 .into(binding.ppThumbnail)
         }
     }
-    fun setDataDiff(newList: List<YTModel.Items>, rv: RecyclerView){
+    fun setDataDiff(newList: List<DBModel.Items>, rv: RecyclerView){
         val playlistDiff = PlaylistDiffUtil(playerItems, newList)
         val diff = DiffUtil.calculateDiff(playlistDiff)
         playerItems.addAll(newList)
@@ -60,6 +60,6 @@ class PlayerPlaylistAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         playerItems.clear()
     }
     fun interface ItemClickListener {
-        fun onClick(data: YTModel.Items)
+        fun onClick(data: DBModel.Items)
     }
 }

@@ -1,3 +1,3 @@
 package com.coffenow.wave.model
 
-data class DBPlaylistModel(val name : String)
+data class DBPlaylistModel(val title : String)

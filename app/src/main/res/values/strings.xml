@@ -27,5 +27,13 @@
     <string name="queue">Current Wave</string>
     <string name="DataMode">DataMode</string>
     <string name="save">save</string>
+    <string name="list_menu">options menu</string>
+    <string name="songs">songs</string>
+
+    <string-array name="MusicSpinnerOptions">
+        <item>Add to…</item>
+        <item>Mark as favorite</item>
+        <item>Download</item>
+    </string-array>
 
 </resources>

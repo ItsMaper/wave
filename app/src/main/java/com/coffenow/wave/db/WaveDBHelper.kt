@@ -8,14 +8,14 @@ import android.database.sqlite.SQLiteOpenHelper
 class WaveDBHelper(context:Context): SQLiteOpenHelper(context, "wave.db", null, 1) {
     override fun onCreate(db: SQLiteDatabase?) {
         val searchesCreate = "CREATE TABLE IF NOT EXISTS searches " +
-                "(videoID TEXT PRIMARY KEY, name TEXT, publisher TEXT, thumbURL TEXT);"
+                "(videoID TEXT PRIMARY KEY, title TEXT, publisher TEXT, thumbnail TEXT);"
         val playlistsCreate = "CREATE TABLE IF NOT EXISTS playlists " +
-                "(name TEXT PRIMARY KEY);"
+                "(title TEXT PRIMARY KEY);"
         val favoritesCreate = "CREATE TABLE IF NOT EXISTS favorites " +
-                "(videoID TEXT PRIMARY KEY, name TEXT, publisher TEXT, thumbURL TEXT);"
+                "(videoID TEXT PRIMARY KEY, title TEXT, publisher TEXT, thumbnail TEXT);"
         db!!.execSQL(searchesCreate)
         val data = ContentValues()
-        data.put("name", "favorites")
+        data.put("title", "favorites")
         db.insert("playlists", null, data)
         db.execSQL(playlistsCreate)
         db.execSQL(favoritesCreate)
@@ -29,7 +29,7 @@ class WaveDBHelper(context:Context): SQLiteOpenHelper(context, "wave.db", null, 
     fun createPlaylist(tableName:String){
         val db = this.writableDatabase
         val orderCreate = "CREATE TABLE IF NOT EXISTS "+ tableName +
-                " (videoID TEXT PRIMARY KEY, name TEXT, publisher TEXT, thumbURL TEXT);"
+                " (videoID TEXT PRIMARY KEY, title TEXT, publisher TEXT, thumbnail TEXT);"
         db.execSQL(orderCreate)
     }
 

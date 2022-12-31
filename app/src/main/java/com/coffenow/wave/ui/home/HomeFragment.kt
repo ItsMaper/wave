@@ -127,7 +127,8 @@ class HomeFragment : Fragment() {
                         onlineAdapter.clearAll()
                         viewModel?.getOnlineList()
                         searchView.clearFocus()
-                        binding.rvOnlineMusic.scrollToPosition(0)}
+                        binding.rvOnlineMusic.scrollToPosition(0)
+                    initOnlineRecyclerView()}
                     return true }
                 override fun onQueryTextChange(newText: String): Boolean {
                     if (newText.isEmpty()){
@@ -139,10 +140,6 @@ class HomeFragment : Fragment() {
                         start()}
                     return false } }) }
     }
-
-    private fun rvScrollItemsState(pos:Int) {
-        }
-
 
 
     override fun onDestroy() {

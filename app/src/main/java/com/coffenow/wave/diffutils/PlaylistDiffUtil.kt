@@ -1,12 +1,12 @@
 package com.coffenow.wave.diffutils
 
 import androidx.recyclerview.widget.DiffUtil
-import com.coffenow.wave.model.YTModel
+import com.coffenow.wave.model.DBModel
 
 
 class PlaylistDiffUtil(
-    private val oldList: ArrayList<YTModel.Items>,
-    private val newList: List<YTModel.Items>
+    private val oldList: ArrayList<DBModel.Items>,
+    private val newList: List<DBModel.Items>
 ) : DiffUtil.Callback() {
     override fun getOldListSize(): Int {
         return oldList.size
@@ -23,6 +23,6 @@ class PlaylistDiffUtil(
     override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
         val oldVideo = oldList[oldItemPosition]
         val newVideo = newList[newItemPosition]
-        return oldVideo.snippet.title == newVideo.snippet.title
+        return oldVideo.title == newVideo.title
     }
 }

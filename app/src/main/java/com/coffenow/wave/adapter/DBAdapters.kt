@@ -3,6 +3,7 @@ package com.coffenow.wave.adapter
 import android.content.Context
 import android.content.Intent
 import android.database.Cursor
+import android.database.sqlite.SQLiteDatabase
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
@@ -12,14 +13,14 @@ import com.coffenow.wave.activities.PlayerActivity
 import com.coffenow.wave.databinding.ItemPlaylistBinding
 import com.coffenow.wave.databinding.OnlineMusicBinding
 import com.coffenow.wave.databinding.PlayerItemPlaylistBinding
+import com.coffenow.wave.db.WaveDBHelper
 import com.coffenow.wave.model.DBModel
 import com.coffenow.wave.model.DBPlaylistModel
-import com.coffenow.wave.model.YTModel
 
 class RecyclerSearchesByDB : RecyclerView.Adapter<RecyclerView.ViewHolder>(){
     lateinit var context: Context
     private lateinit var cursor: Cursor
-    private var items = ArrayList<DBModel>()
+    private var items = ArrayList<DBModel.Items>()
 
     fun rvSet(context: Context, cursor: Cursor){
         this.context=context
@@ -37,23 +38,24 @@ class RecyclerSearchesByDB : RecyclerView.Adapter<RecyclerView.ViewHolder>(){
         val name = cursor.getString(1)
         val publisher = cursor.getString(2)
         val thumb = cursor.getString(3)
-        items.add(DBModel(videoID,name,publisher,thumb))
+        items.add(DBModel.Items(videoID,name,publisher,thumb))
         (holder as ItemHolder).setData(items[position])
     }
 
     inner class ItemHolder (itemView: OnlineMusicBinding) : RecyclerView.ViewHolder(itemView.root){
         private val binding = itemView
-        fun setData(data:DBModel){
+        fun setData(data:DBModel.Items){
             binding.root.setOnClickListener {
                 val i = Intent(it.context, PlayerActivity::class.java)
                 i.putExtra("type", "web")
+                i.putExtra("playlist","searches")
                 i.putExtra("id", data.id)
-                i.putExtra("title", data.name)
+                i.putExtra("title", data.title)
                 i.putExtra("publisher", data.channelName)
                 i.putExtra("thumbnail", data.thumb)
                 it.context.startActivity(i)
             }
-            binding.onlineTitle.text =data.name
+            binding.onlineTitle.text =data.title
             binding.onlinePublisher.text =data.channelName
             Glide.with(context)
                 .load(data.thumb)
@@ -71,7 +73,7 @@ class RecyclerPlayerPlaylistByDB : RecyclerView.Adapter<RecyclerView.ViewHolder>
     private lateinit var cursor: Cursor
     var currentSelected: Int? = 0
     var addListener: ItemClickListener? = null
-    private var playerItems = ArrayList<DBModel>()
+    private var playerItems = ArrayList<DBModel.Items>()
 
     fun rvSet(context: Context, cursor: Cursor){
         this.context=context
@@ -91,7 +93,7 @@ class RecyclerPlayerPlaylistByDB : RecyclerView.Adapter<RecyclerView.ViewHolder>
         val name = cursor.getString(1)
         val publisher = cursor.getString(2)
         val thumb = cursor.getString(3)
-        playerItems.add(DBModel(videoID,name,publisher,thumb))
+        playerItems.add(DBModel.Items(videoID,name,publisher,thumb))
         val function = { pos: Int ->
             if (currentSelected == null || currentSelected != pos) {
                 currentSelected = pos
@@ -103,7 +105,7 @@ class RecyclerPlayerPlaylistByDB : RecyclerView.Adapter<RecyclerView.ViewHolder>
 
     inner class ItemHolder (itemView: PlayerItemPlaylistBinding) : RecyclerView.ViewHolder(itemView.root){
         private val binding = itemView
-        fun setData(data:DBModel, selected: Boolean, function: (Int) -> Unit, position: Int){
+        fun setData(data:DBModel.Items, selected: Boolean, function: (Int) -> Unit, position: Int){
             binding.root.isSelected = selected
             binding.root.setOnClickListener {
                 function(position)
@@ -111,7 +113,7 @@ class RecyclerPlayerPlaylistByDB : RecyclerView.Adapter<RecyclerView.ViewHolder>
                     addListener?.onClick(data)
                 }
             }
-            binding.tvPpTitle.text =data.name
+            binding.tvPpTitle.text =data.title
             Glide.with(context)
                 .load(data.thumb)
                 .into(binding.ppThumbnail)
@@ -120,9 +122,11 @@ class RecyclerPlayerPlaylistByDB : RecyclerView.Adapter<RecyclerView.ViewHolder>
     }
 
     fun interface ItemClickListener {
-        fun onClick(data: DBModel)
+        fun onClick(data: DBModel.Items)
     }
+
 }
+
 
 
 class RecyclerPlaylistByDB : RecyclerView.Adapter<RecyclerView.ViewHolder>(){
@@ -153,12 +157,21 @@ class RecyclerPlaylistByDB : RecyclerView.Adapter<RecyclerView.ViewHolder>(){
             binding.root.setOnClickListener {
                 val i = Intent(it.context, PlayerActivity::class.java)
                 i.putExtra("type", "web")
-                i.putExtra("playlist" , data.name)
+                i.putExtra("playlist" , data.title)
                 it.context.startActivity(i)
             }
-            binding.playlistTitle.text= data.name.replaceFirstChar{data.name[0].titlecase()}
-            binding.playlistCount.text = cursor.count.toString()
+
+            binding.playlistTitle.text= data.title.replaceFirstChar{data.title[0].titlecase()}
+            binding.playlistCount.text = "${getCount(data.title)} + ${R.string.songs}"
             binding.playlistThumbnail.setImageResource(R.drawable.ic_baseline_wave_list)
+        }
+
+        private fun getCount(title: String) : String {
+            val db:SQLiteDatabase = WaveDBHelper(context).readableDatabase
+            val cursor: Cursor = db.rawQuery(
+                "SELECT * FROM $title",null
+            )
+            return cursor.count.toString()
         }
     }
     override fun getItemCount(): Int {

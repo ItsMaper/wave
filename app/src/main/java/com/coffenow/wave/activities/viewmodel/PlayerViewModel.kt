@@ -12,26 +12,21 @@ import retrofit2.Response
 
 class PlayerViewModel : ViewModel() {
     var relatedTo : String?= null
-    private val _playList = MutableLiveData<YTModel?>()
-    val playlistData = _playList
     var nextPageToken: String? = null
+    private lateinit var Items : DBModel
+    lateinit var firsItem : DBModel.Items
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading = _isLoading
     private val _message = MutableLiveData<String>()
     val message = _message
     private val _isAllDataOnlineLoaded = MutableLiveData<Boolean>()
     val isAllDataOnlineLoaded = _isAllDataOnlineLoaded
+    private val _playList = MutableLiveData<DBModel>()
+    var playlistData = _playList
 
-    fun fromApiRestToDBData():ArrayList<DBModel>{
-        val playlist = ArrayList<DBModel>()
-            for(item in _playList.value!!.items){
-                playlist.add(DBModel(item.videoId.videoID!!,item.snippet.title,item.snippet.channelTitle,item
-                    .snippet.thumbnails.high.url)) }
-        return playlist
-    }
-
-    fun getPlayerlist(){
+    fun getApiData(){
         _isLoading.value = true
+        var itemsToParse = ArrayList<DBModel.Items>()
         val client = YTApiConfig
             .getService()
             .getVideoRelated(
@@ -48,7 +43,15 @@ class PlayerViewModel : ViewModel() {
                     if (data != null){
                         if (data.nextPageToken != null) { nextPageToken = data.nextPageToken }
                         else { _isAllDataOnlineLoaded.value = true }
-                        if (data.items.isNotEmpty()){ playlistData.value = data } }
+                        if (data.items.isNotEmpty()){
+                            itemsToParse.add(firsItem)
+                            for (items in data.items){
+                                val thisItems = DBModel.Items(items.videoId.videoID!!, items.snippet.title, items.snippet.channelTitle, items.snippet.thumbnails.high.url)
+                                itemsToParse.add(thisItems)
+                            }
+                            playlistData.value = DBModel(itemsToParse)
+                        }
+                    }
                     else { _message.value = "No Music" }
                 } else { _message.value = response.message() } }
             override fun onFailure(call: Call<YTModel>, t: Throwable) {
@@ -60,5 +63,4 @@ class PlayerViewModel : ViewModel() {
 
     companion object {
         private val TAG = PlayerViewModel::class.java.simpleName
-    }
-}
+    }}

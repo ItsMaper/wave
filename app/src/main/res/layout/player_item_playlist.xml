@@ -40,8 +40,8 @@
                 android:id="@+id/tv_pp_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="45pt"
-                android:layout_marginEnd="10dp"
+                android:layout_marginStart="42pt"
+                android:layout_marginEnd="35dp"
                 android:ellipsize="end"
                 android:maxLines="1"
                 android:textColor="@color/white"
@@ -50,6 +50,18 @@
                 app:layout_constraintStart_toEndOf="@+id/pp_thumbnail"
                 app:layout_constraintTop_toTopOf="parent"
                 tools:text="@tools:sample/full_names" />
+
+            <Spinner
+                android:id="@+id/spinner"
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/ic_baseline_format_list"
+                android:contentDescription="@string/list_menu"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:ignore="TouchTargetSizeCheck" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -84,11 +84,11 @@ class LibraryFragment : Fragment() {
                 inputEditText.setText("")
                 inputEditText.hint = "Name"
                 addBtn.visibility = VISIBLE
-                initRecyclerView()
             } else{
                 Toast.makeText(appContext, R.string.isEmpty, Toast.LENGTH_SHORT).show()
                 addBtn.visibility = VISIBLE
             }
+            initRecyclerView()
         }
 
     }

@@ -240,5 +240,16 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/player_thumbnail" />
 
+    <ImageButton
+        android:id="@+id/favoriteButton"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:layout_marginBottom="25dp"
+        android:background="@android:color/transparent"
+        app:layout_constraintBottom_toTopOf="@+id/player_title"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:srcCompat="@drawable/ic_baseline_favorite_border" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
