@@ -6,6 +6,8 @@ import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.coffenow.wave.R
@@ -14,6 +16,7 @@ import com.coffenow.wave.databinding.ItemPlaylistBinding
 import com.coffenow.wave.databinding.OnlineMusicBinding
 import com.coffenow.wave.databinding.PlayerItemPlaylistBinding
 import com.coffenow.wave.db.WaveDBHelper
+import com.coffenow.wave.diffutils.PlaylistDiffUtil
 import com.coffenow.wave.model.DBModel
 import com.coffenow.wave.model.DBPlaylistModel
 
@@ -69,31 +72,18 @@ class RecyclerSearchesByDB : RecyclerView.Adapter<RecyclerView.ViewHolder>(){
 }
 
 class RecyclerPlayerPlaylistByDB : RecyclerView.Adapter<RecyclerView.ViewHolder>(){
-    lateinit var context: Context
-    private lateinit var cursor: Cursor
     var currentSelected: Int? = 0
     var addListener: ItemClickListener? = null
     private var playerItems = ArrayList<DBModel.Items>()
-
-    fun rvSet(context: Context, cursor: Cursor){
-        this.context=context
-        this.cursor=cursor
-    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val view = PlayerItemPlaylistBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return ItemHolder(view)
     }
     override fun getItemCount(): Int {
-        return cursor.count
+        return playerItems.size
     }
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        cursor.moveToPosition(position)
-        val videoID = cursor.getString(0)
-        val name = cursor.getString(1)
-        val publisher = cursor.getString(2)
-        val thumb = cursor.getString(3)
-        playerItems.add(DBModel.Items(videoID,name,publisher,thumb))
         val function = { pos: Int ->
             if (currentSelected == null || currentSelected != pos) {
                 currentSelected = pos
@@ -114,11 +104,19 @@ class RecyclerPlayerPlaylistByDB : RecyclerView.Adapter<RecyclerView.ViewHolder>
                 }
             }
             binding.tvPpTitle.text =data.title
-            Glide.with(context)
+            Glide.with(binding.root)
                 .load(data.thumb)
                 .into(binding.ppThumbnail)
         }
 
+    }
+
+    fun setDataDiff(newList: List<DBModel.Items>, rv: RecyclerView){
+        val playlistDiff = PlaylistDiffUtil(playerItems, newList)
+        val diff = DiffUtil.calculateDiff(playlistDiff)
+        playerItems.addAll(newList)
+        diff.dispatchUpdatesTo(this)
+        rv.scrollToPosition(playerItems.size - newList.size)
     }
 
     fun interface ItemClickListener {
@@ -155,23 +153,27 @@ class RecyclerPlaylistByDB : RecyclerView.Adapter<RecyclerView.ViewHolder>(){
         private val binding = itemView
         fun setData(data:DBPlaylistModel){
             binding.root.setOnClickListener {
-                val i = Intent(it.context, PlayerActivity::class.java)
-                i.putExtra("type", "web")
-                i.putExtra("playlist" , data.title)
-                it.context.startActivity(i)
+                if(getCount(data.title) > 0){
+                    val i = Intent(it.context, PlayerActivity::class.java)
+                    i.putExtra("type", "web")
+                    i.putExtra("playlist" , data.title)
+                    it.context.startActivity(i)
+                } else{
+                    Toast.makeText(context, "You need add items to load", Toast.LENGTH_SHORT).show()
+                }
             }
 
             binding.playlistTitle.text= data.title.replaceFirstChar{data.title[0].titlecase()}
-            binding.playlistCount.text = "${getCount(data.title)} + ${R.string.songs}"
+            binding.playlistCount.text = "%s Waves".format(getCount(data.title))
             binding.playlistThumbnail.setImageResource(R.drawable.ic_baseline_wave_list)
         }
 
-        private fun getCount(title: String) : String {
+        private fun getCount(title: String) : Int {
             val db:SQLiteDatabase = WaveDBHelper(context).readableDatabase
             val cursor: Cursor = db.rawQuery(
                 "SELECT * FROM $title",null
             )
-            return cursor.count.toString()
+            return cursor.count
         }
     }
     override fun getItemCount(): Int {

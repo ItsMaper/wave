@@ -5,7 +5,7 @@ import com.coffenow.wave.model.DBModel
 
 
 class PlaylistDiffUtil(
-    private val oldList: ArrayList<DBModel.Items>,
+    private val oldList: List<DBModel.Items>,
     private val newList: List<DBModel.Items>
 ) : DiffUtil.Callback() {
     override fun getOldListSize(): Int {

@@ -29,6 +29,7 @@
     <string name="save">save</string>
     <string name="list_menu">options menu</string>
     <string name="songs">songs</string>
+    <string name="favoriteSong">addFavorite</string>
 
     <string-array name="MusicSpinnerOptions">
         <item>Add to…</item>

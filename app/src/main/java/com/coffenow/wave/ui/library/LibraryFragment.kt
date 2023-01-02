@@ -79,7 +79,7 @@ class LibraryFragment : Fragment() {
                 val playlistName: String = inputEditText.text.toString()
                 dbHelper.createPlaylist(playlistName)
                 val data = ContentValues()
-                data.put("name", playlistName)
+                data.put("title", playlistName)
                 db.insert("playlists", null, data)
                 inputEditText.setText("")
                 inputEditText.hint = "Name"

@@ -14,11 +14,11 @@ class WaveDBHelper(context:Context): SQLiteOpenHelper(context, "wave.db", null, 
         val favoritesCreate = "CREATE TABLE IF NOT EXISTS favorites " +
                 "(videoID TEXT PRIMARY KEY, title TEXT, publisher TEXT, thumbnail TEXT);"
         db!!.execSQL(searchesCreate)
+        db.execSQL(playlistsCreate)
+        db.execSQL(favoritesCreate)
         val data = ContentValues()
         data.put("title", "favorites")
         db.insert("playlists", null, data)
-        db.execSQL(playlistsCreate)
-        db.execSQL(favoritesCreate)
     }
 
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
@@ -42,7 +42,6 @@ class WaveDBHelper(context:Context): SQLiteOpenHelper(context, "wave.db", null, 
                 return true
             }
         }
-        onCreate(db)
         return false
     }
 
@@ -50,6 +49,5 @@ class WaveDBHelper(context:Context): SQLiteOpenHelper(context, "wave.db", null, 
         val db = this.writableDatabase
         db.insert(tableName, null, data)
         db.close()
-
     }
 }

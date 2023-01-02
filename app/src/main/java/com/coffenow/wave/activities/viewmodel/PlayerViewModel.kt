@@ -1,5 +1,6 @@
 package com.coffenow.wave.activities.viewmodel
 
+import android.database.Cursor
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -13,7 +14,6 @@ import retrofit2.Response
 class PlayerViewModel : ViewModel() {
     var relatedTo : String?= null
     var nextPageToken: String? = null
-    private lateinit var Items : DBModel
     lateinit var firsItem : DBModel.Items
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading = _isLoading
@@ -23,6 +23,8 @@ class PlayerViewModel : ViewModel() {
     val isAllDataOnlineLoaded = _isAllDataOnlineLoaded
     private val _playList = MutableLiveData<DBModel>()
     var playlistData = _playList
+    private val _DBplayList = MutableLiveData<DBModel>()
+    var playlistDBData = _DBplayList
 
     fun getApiData(){
         _isLoading.value = true
@@ -59,6 +61,54 @@ class PlayerViewModel : ViewModel() {
                 Log.e(TAG, "Failed: ", t)
                 _message.value = t.message }
         })
+    }
+
+    fun parseDBData(cursor: Cursor){
+        val toParse = ArrayList<DBModel.Items>()
+        var i = 0
+        while (i < cursor.count){
+            cursor.moveToPosition(i)
+            val id = cursor.getString(0)
+            val title = cursor.getString(1)
+            val channel = cursor.getString(2)
+            val thumb =cursor.getString(3)
+            toParse.add(DBModel.Items(id, title, channel, thumb))
+            i++
+        }
+        playlistData.value = DBModel(toParse)
+    }
+
+    fun formatTime(t: Int) : String {
+        val hours = t / 3600
+        val minutes = (t % 3600) / 60
+        val seconds = t % 60
+        if (hours == 0) {
+            return if (minutes<=9){
+                if (seconds <= 9) {
+                    "0$minutes:0$seconds"
+                } else {
+                    "0$minutes:$seconds"
+                }
+            }else{
+                if (seconds <= 9) {
+                    "$minutes:0$seconds"
+                } else {
+                    "$minutes:$seconds"
+                }}
+        } else{
+            return if (minutes<=9){
+                if (seconds <= 9) {
+                    "$hours:0$minutes:0$seconds"
+                } else {
+                    "$hours:0$minutes:$seconds"
+                }
+            }else{
+                if (seconds <= 9) {
+                    "$hours:$minutes:0$seconds"
+                } else {
+                    "$hours:$minutes:$seconds"
+                }}
+        }
     }
 
     companion object {

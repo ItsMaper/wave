@@ -144,7 +144,7 @@ class HomeFragment : Fragment() {
 
     override fun onDestroy() {
         super.onDestroy()
-        db.close()
+        dbHelper.close()
     }
 }
 
