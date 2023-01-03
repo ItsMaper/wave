@@ -3,101 +3,86 @@ package com.coffenow.wave.services
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
-import android.view.View
-import android.widget.*
-import com.coffenow.wave.R
+import androidx.lifecycle.MutableLiveData
+import com.coffenow.wave.model.OnBackPlayerTime
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.PlayerConstants
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
-import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.YouTubePlayerListener
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.options.IFramePlayerOptions
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
 
-class OnBackPlayer : Service(), YouTubePlayerListener {
+class OnBackPlayer : Service() {
 
-    private var youtubePlayer: YouTubePlayer? = null
-    private lateinit var ytpl:YouTubePlayerView
-    private lateinit var playBtn: ImageButton
-    private lateinit var seekBar: SeekBar
-    private lateinit var timeTotal : TextView
-    private lateinit var currentTime : TextView
-    private var maxTime:Float = 0F
-    private var curTime:Float = 0F
-    private var isPlaying =false
-    private var idBase : String? = null
+    private lateinit var listener: AbstractYouTubePlayerListener
+    private lateinit var player:YouTubePlayerView
+    private lateinit var opts : IFramePlayerOptions
+    private var currentQueue: Int = 0
+    private val _isPlaying = MutableLiveData<Boolean>()
+    var isPlaying =_isPlaying
+    private val _duration = MutableLiveData<OnBackPlayerTime>()
+    var duration = _duration
+    private val _currentSecond = MutableLiveData<OnBackPlayerTime>()
+    var currentSecond = _currentSecond
+    var playlist = mutableListOf<String>()
 
     companion object{
-        var isPlaying = false
+        private val TAG = OnBackPlayer::class.java.simpleName
     }
 
     override fun onBind(intent: Intent): IBinder? =  null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        idBase = intent?.getStringExtra("idBase")
-        val opts = IFramePlayerOptions.Builder()
+        setterBind()
+
+
+        return START_STICKY
+    }
+    private fun setterBind() {
+        player = YouTubePlayerView(this)
+        opts = IFramePlayerOptions.Builder()
             .controls(0)
             .rel(0)
             .ivLoadPolicy(3)
             .ccLoadPolicy(3)
             .build()
-        ytpl = YouTubePlayerView(this)
-        ytpl.enableAutomaticInitialization = false
-        ytpl.initialize(this, false, opts)
-        ytpl.enableBackgroundPlayback(true)
-        return START_STICKY
-    }
-    private fun setterBind() {
+        listener = object : AbstractYouTubePlayerListener() {
+            override fun onReady(youTubePlayer: YouTubePlayer) {
+                youTubePlayer.loadVideo(playlist[currentQueue], 0F)
+                super.onReady(youTubePlayer)
+            }
 
-    }
-    override fun onDestroy() {
-        super.onDestroy()
-        ytpl.release()
-    }
+            override fun onStateChange(youTubePlayer: YouTubePlayer, state: PlayerConstants.PlayerState) {
+                super.onStateChange(youTubePlayer, state)
+                _isPlaying.value = state == PlayerConstants.PlayerState.PLAYING
+            }
 
-    override fun onReady(youTubePlayer: YouTubePlayer) {
-        val videoId = idBase
-        videoId?.let {
-            youTubePlayer.loadVideo(it, 0f)
-        }
-        this.youtubePlayer =youTubePlayer
-    }
+            override fun onCurrentSecond(youTubePlayer: YouTubePlayer, second: Float) {
+                super.onCurrentSecond(youTubePlayer, second)
+                val time = second.toInt()
+                _currentSecond.value = OnBackPlayerTime(time, formatTime(time))
+            }
 
-    override fun onCurrentSecond(youTubePlayer: YouTubePlayer, second: Float) {
-        curTime=second
-        seekBar.progress = curTime.toInt()
-        currentTime.text = formatTime(second.toInt())
-    }
+            override fun onVideoDuration(youTubePlayer: YouTubePlayer, duration: Float) {
+                super.onVideoDuration(youTubePlayer, duration)
+                val time = duration.toInt()
+                _currentSecond.value = OnBackPlayerTime(time, formatTime(time))
+            }
 
-    override fun onVideoDuration(youTubePlayer: YouTubePlayer, duration: Float) {
-        maxTime = duration
-        seekBar.max= maxTime.toInt()
-        timeTotal.text= formatTime(duration.toInt())
-    }
-
-    override fun onStateChange(youTubePlayer: YouTubePlayer, state: PlayerConstants.PlayerState) {
-        isPlaying = if (state == PlayerConstants.PlayerState.PLAYING ){
-            playBtn.setImageResource(R.drawable.ic_baseline_motion_photos_paused_24)
-            true
-        } else {
-            playBtn.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
-            false
-        }
-        playBtn.setOnClickListener{
-            if(state == PlayerConstants.PlayerState.PLAYING){
-                youTubePlayer.pause()
-                playBtn.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
-            } else if(state==PlayerConstants.PlayerState.PAUSED){
-                playBtn.setImageResource(R.drawable.ic_baseline_motion_photos_paused_24)
-                youTubePlayer.play()
+            override fun onError(youTubePlayer: YouTubePlayer, error: PlayerConstants.PlayerError) {
+                super.onError(youTubePlayer, error)
+                currentQueue += 1
+                youTubePlayer.loadVideo(playlist[currentQueue], 0F)
             }
         }
+        player.enableAutomaticInitialization = false
+        player.initialize(listener, false, opts)
+        player.enableBackgroundPlayback(true)
     }
 
-    override fun onVideoId(youTubePlayer: YouTubePlayer, videoId: String) {}
-    override fun onVideoLoadedFraction(youTubePlayer: YouTubePlayer, loadedFraction: Float) {}
-    override fun onPlaybackQualityChange(youTubePlayer: YouTubePlayer, playbackQuality: PlayerConstants.PlaybackQuality) {}
-    override fun onPlaybackRateChange(youTubePlayer: YouTubePlayer, playbackRate: PlayerConstants.PlaybackRate) {}
-    override fun onApiChange(youTubePlayer: YouTubePlayer) {}
-    override fun onError(youTubePlayer: YouTubePlayer, error: PlayerConstants.PlayerError) {}
+    override fun onDestroy() {
+        super.onDestroy()
+        player.release()
+    }
 
     private fun formatTime(t: Int) : String {
         val hours = t / 3600
