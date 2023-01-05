@@ -23,12 +23,10 @@ class PlayerViewModel : ViewModel() {
     val isAllDataOnlineLoaded = _isAllDataOnlineLoaded
     private val _playList = MutableLiveData<DBModel>()
     var playlistData = _playList
-    private val _DBplayList = MutableLiveData<DBModel>()
-    var playlistDBData = _DBplayList
 
     fun getApiData(){
         _isLoading.value = true
-        var itemsToParse = ArrayList<DBModel.Items>()
+        val itemsToParse = ArrayList<DBModel.Items>()
         val client = YTApiConfig
             .getService()
             .getVideoRelated(
@@ -51,7 +49,7 @@ class PlayerViewModel : ViewModel() {
                                 val thisItems = DBModel.Items(items.videoId.videoID!!, items.snippet.title, items.snippet.channelTitle, items.snippet.thumbnails.high.url)
                                 itemsToParse.add(thisItems)
                             }
-                            playlistData.value = DBModel(itemsToParse)
+                            _playList.value = DBModel(itemsToParse)
                         }
                     }
                     else { _message.value = "No Music" }
@@ -65,6 +63,7 @@ class PlayerViewModel : ViewModel() {
 
     fun parseDBData(cursor: Cursor){
         val toParse = ArrayList<DBModel.Items>()
+        toParse.add(firsItem)
         var i = 0
         while (i < cursor.count){
             cursor.moveToPosition(i)

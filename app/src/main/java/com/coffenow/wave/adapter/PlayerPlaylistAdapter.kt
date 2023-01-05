@@ -2,6 +2,7 @@ package com.coffenow.wave.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -11,7 +12,7 @@ import com.coffenow.wave.model.DBModel
 
 class PlayerPlaylistAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     private val playerItems = ArrayList<DBModel.Items>()
-    var currentSelected: Int? = 0
+    var currentSelected :  MutableLiveData<Int> = MutableLiveData(0)
     var addListener: ItemClickListener? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -21,12 +22,12 @@ class PlayerPlaylistAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val function = { pos: Int ->
-            if (currentSelected == null || currentSelected != pos) {
-                currentSelected = pos
+            if (currentSelected.value == null || currentSelected.value != pos) {
+                currentSelected = MutableLiveData(pos)
                 notifyDataSetChanged()
             }
         }
-        (holder as PPlaylistHolder).setData(playerItems[position],position == currentSelected, function, position)
+        (holder as PPlaylistHolder).setData(playerItems[position],position == currentSelected.value, function, position)
     }
     override fun getItemCount(): Int = playerItems.size
 

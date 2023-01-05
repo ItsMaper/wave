@@ -31,10 +31,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Wave"
         tools:targetApi="31">
-        <service
-            android:name=".services.OnBackPlayer"
-            android:enabled="true"
-            android:exported="true" />
 
         <activity
             android:name=".activities.SplashScreen"
@@ -66,7 +62,10 @@
                 android:name="android.app.lib_name"
                 android:value="" />
         </activity>
-
+        <service
+            android:name=".services.OnBackPlayer"
+            android:enabled="true"
+            android:exported="false" />
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-3940256099942544~3347511713" />

@@ -5,7 +5,7 @@
     <!-- we define border color and thick -->
     <stroke
         android:width="2dp"
-        android:color="@color/sub"  />
+        android:color="@color/main"  />
 
     <!-- we define corner radius, note that radius can be different for each corner -->
     <corners android:topLeftRadius="12dp" android:topRightRadius="12dp"/>

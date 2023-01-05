@@ -12,7 +12,7 @@ import com.coffenow.wave.diffutils.VideoDiffUtil
 import com.coffenow.wave.model.YTModel
 
 class OnlineMusicAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-    private var oldItems = ArrayList<YTModel.Items>()
+    private val items = ArrayList<YTModel.Items>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val view = OnlineMusicBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -20,9 +20,9 @@ class OnlineMusicAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        (holder as OnlineHolder).setData(oldItems[position])
+        (holder as OnlineHolder).setData(items[position])
     }
-    override fun getItemCount(): Int = oldItems.size
+    override fun getItemCount(): Int = items.size
 
     class OnlineHolder(itemView: OnlineMusicBinding) : RecyclerView.ViewHolder(itemView.root){
         private val binding = itemView
@@ -49,18 +49,16 @@ class OnlineMusicAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         }
     }
 
-    fun setDataDiff(newList: List<YTModel.Items>, rv: RecyclerView, isScroll:Boolean){
-        val videoDiff = VideoDiffUtil(oldItems, newList)
+    fun setDataDiff(newList: List<YTModel.Items>, rv: RecyclerView){
+        val videoDiff = VideoDiffUtil(items, newList)
         val diff = DiffUtil.calculateDiff(videoDiff)
-        oldItems.addAll(newList)
+        items.addAll(newList)
         diff.dispatchUpdatesTo(this)
-        if (isScroll){
-            rv.scrollToPosition(oldItems.size - newList.size)
-        }
+        rv.scrollToPosition(items.size - newList.size)
     }
 
     fun clearAll(){
-        oldItems.clear()
+        items.clear()
         notifyDataSetChanged()
     }
 }

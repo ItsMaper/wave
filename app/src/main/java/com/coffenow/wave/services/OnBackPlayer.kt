@@ -4,6 +4,8 @@ import android.app.Service
 import android.content.Intent
 import android.os.IBinder
 import androidx.lifecycle.MutableLiveData
+import com.coffenow.wave.activities.PlayerActivity
+import com.coffenow.wave.model.DBModel
 import com.coffenow.wave.model.OnBackPlayerTime
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.PlayerConstants
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
@@ -14,31 +16,50 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTube
 class OnBackPlayer : Service() {
 
     private lateinit var listener: AbstractYouTubePlayerListener
-    private lateinit var player:YouTubePlayerView
+    private lateinit var playerView:YouTubePlayerView
+    private  var player : YouTubePlayer? = null
     private lateinit var opts : IFramePlayerOptions
-    private var currentQueue: Int = 0
-    private val _isPlaying = MutableLiveData<Boolean>()
-    var isPlaying =_isPlaying
-    private val _duration = MutableLiveData<OnBackPlayerTime>()
-    var duration = _duration
-    private val _currentSecond = MutableLiveData<OnBackPlayerTime>()
-    var currentSecond = _currentSecond
-    var playlist = mutableListOf<String>()
-
-    companion object{
-        private val TAG = OnBackPlayer::class.java.simpleName
-    }
+    private var playlist = MutableLiveData<DBModel>()
+    private var currentSoundID : MutableLiveData<String> = MutableLiveData("")
+    private var currentTitle = MutableLiveData<String>()
 
     override fun onBind(intent: Intent): IBinder? =  null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         setterBind()
-
-
+        setObservers()
         return START_STICKY
     }
+
+    private fun setObservers() {
+        PlayerActivity.playlistService.observeForever {
+            playlist.value = it
+        }
+
+        PlayerActivity.currentQueue.observeForever {it1->
+            playlist.observeForever {
+                currentSoundID.value = it.items[it1].id
+            }
+        }
+
+        PlayerActivity.userSecond.observeForever {
+            player?.seekTo(it)
+        }
+
+        PlayerActivity.playControl.observeForever {
+            if (it){
+                player?.play()
+            } else{
+                player?.pause()
+            }
+        }
+        currentSoundID.observeForever {
+            player?.loadVideo(it, 0f)
+        }
+    }
+
     private fun setterBind() {
-        player = YouTubePlayerView(this)
+        playerView = YouTubePlayerView(this)
         opts = IFramePlayerOptions.Builder()
             .controls(0)
             .rel(0)
@@ -47,41 +68,41 @@ class OnBackPlayer : Service() {
             .build()
         listener = object : AbstractYouTubePlayerListener() {
             override fun onReady(youTubePlayer: YouTubePlayer) {
-                youTubePlayer.loadVideo(playlist[currentQueue], 0F)
+                player = youTubePlayer
+                youTubePlayer.loadVideo(currentSoundID.value!!, 0F)
                 super.onReady(youTubePlayer)
             }
 
             override fun onStateChange(youTubePlayer: YouTubePlayer, state: PlayerConstants.PlayerState) {
                 super.onStateChange(youTubePlayer, state)
-                _isPlaying.value = state == PlayerConstants.PlayerState.PLAYING
+                PlayerActivity.isPlaying.value = state == PlayerConstants.PlayerState.PLAYING
             }
 
             override fun onCurrentSecond(youTubePlayer: YouTubePlayer, second: Float) {
                 super.onCurrentSecond(youTubePlayer, second)
                 val time = second.toInt()
-                _currentSecond.value = OnBackPlayerTime(time, formatTime(time))
+                PlayerActivity.currentSecond.value = OnBackPlayerTime(time, formatTime(time))
+                if(PlayerActivity.currentSecond.value!!.seekBar == PlayerActivity.duration.value!!.seekBar){
+                    PlayerActivity.currentQueue.value = PlayerActivity.currentQueue.value!! + 1
+                }
             }
 
             override fun onVideoDuration(youTubePlayer: YouTubePlayer, duration: Float) {
                 super.onVideoDuration(youTubePlayer, duration)
                 val time = duration.toInt()
-                _currentSecond.value = OnBackPlayerTime(time, formatTime(time))
+                PlayerActivity.duration.value = OnBackPlayerTime(time, formatTime(time))
             }
 
             override fun onError(youTubePlayer: YouTubePlayer, error: PlayerConstants.PlayerError) {
                 super.onError(youTubePlayer, error)
-                currentQueue += 1
-                youTubePlayer.loadVideo(playlist[currentQueue], 0F)
+                PlayerActivity.currentQueue.value = PlayerActivity.currentQueue.value!! + 1
+                youTubePlayer.loadVideo(currentSoundID.value!!, 0F)
             }
         }
-        player.enableAutomaticInitialization = false
-        player.initialize(listener, false, opts)
-        player.enableBackgroundPlayback(true)
-    }
+        playerView.enableAutomaticInitialization = false
+        playerView.initialize(listener, false, opts)
+        playerView.enableBackgroundPlayback(true)
 
-    override fun onDestroy() {
-        super.onDestroy()
-        player.release()
     }
 
     private fun formatTime(t: Int) : String {
@@ -116,5 +137,8 @@ class OnBackPlayer : Service() {
                 }}
         }
     }
-
+    override fun onDestroy() {
+        super.onDestroy()
+        playerView.release()
+    }
 }

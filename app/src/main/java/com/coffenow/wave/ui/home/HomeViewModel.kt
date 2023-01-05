@@ -12,8 +12,8 @@ import retrofit2.Response
 
 class HomeViewModel : ViewModel() {
 
-    private val _online_data = MutableLiveData<YTModel?>()
-    val online_data = _online_data
+    private val _onlineData = MutableLiveData<YTModel?>()
+    val onlineData = _onlineData
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading = _isLoading
     private val _isAllDataOnlineLoaded = MutableLiveData<Boolean>()
@@ -42,7 +42,7 @@ class HomeViewModel : ViewModel() {
                     if (data != null){
                         if (data.nextPageToken != null) { nextPageToken = data.nextPageToken }
                         else { _isAllDataOnlineLoaded.value = true }
-                        if (data.items.isNotEmpty()){ _online_data.value = data } }
+                        if (data.items.isNotEmpty()){ _onlineData.value = data } }
                     else { _message.value = "No Music" }
                 } else { _message.value = response.message() } }
             override fun onFailure(call: Call<YTModel>, t: Throwable) {

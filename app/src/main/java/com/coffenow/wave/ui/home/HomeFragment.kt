@@ -68,7 +68,10 @@ class HomeFragment : Fragment() {
             setSearch()
             if (dbHelper.isFilled("searches")){
                 initDBRecyclerView()
-            } else{initOnlineRecyclerView()}
+            } else{
+                viewModel?.querySearch = resources.getString(R.string.search_bar)
+                viewModel?.getOnlineList()
+                initOnlineRecyclerView()}
         }
 
         private fun initDBRecyclerView() {
@@ -86,8 +89,6 @@ class HomeFragment : Fragment() {
         }
 
         private fun initOnlineRecyclerView() {
-            viewModel?.querySearch= resources.getString(R.string.search_bar)
-            viewModel?.getOnlineList()
             val manager = LinearLayoutManager(requireContext())
             binding.rvOnlineMusic.apply {
                 adapter = onlineAdapter
@@ -109,9 +110,9 @@ class HomeFragment : Fragment() {
                             isScroll = false
                             if (!isLoading && totalItem<=23){
                                 if (!isAllVideoLoaded){ viewModel?.getOnlineList() } } } } })
-                viewModel?.online_data?.observe(viewLifecycleOwner) {
+                viewModel?.onlineData?.observe(viewLifecycleOwner) {
                     if (it != null && it.items.isNotEmpty()) {
-                        onlineAdapter.setDataDiff(it.items, binding.rvOnlineMusic,isScroll) } } }
+                        onlineAdapter.setDataDiff(it.items, binding.rvOnlineMusic) } } }
         }
 
         private fun setSearch() {
@@ -122,22 +123,23 @@ class HomeFragment : Fragment() {
             searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
                 override fun onQueryTextSubmit(q: String): Boolean {
                     if (q.isNotEmpty()){
-                        viewModel?.querySearch = q
                         viewModel?.nextPageToken = null
+                        viewModel?.querySearch = q
                         onlineAdapter.clearAll()
-                        viewModel?.getOnlineList()
                         searchView.clearFocus()
+                        viewModel?.getOnlineList()
                         binding.rvOnlineMusic.scrollToPosition(0)
-                    initOnlineRecyclerView()}
+}
                     return true }
                 override fun onQueryTextChange(newText: String): Boolean {
                     if (newText.isEmpty()){
+                        viewModel?.querySearch = resources.getString(R.string.search_bar)
                         viewModel?.nextPageToken = null
                         onlineAdapter.clearAll()
-                        isScroll=false
                         searchView.clearFocus()
                         binding.rvOnlineMusic.scrollToPosition(0)
-                        start()}
+                        viewModel?.getOnlineList()
+                        }
                     return false } }) }
     }
 
