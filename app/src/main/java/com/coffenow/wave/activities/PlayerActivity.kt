@@ -94,7 +94,7 @@ class PlayerActivity : AppCompatActivity() {
         clickListeners()
         setObserver()
         if (playlistName == "default"){
-            initWebPlaylist() } else{initDBPlaylist(playlistName!!)}
+            initRecyclerView() } else{initDBPlaylist(playlistName!!)}
         initAdsView()
     }
 
@@ -216,63 +216,19 @@ class PlayerActivity : AppCompatActivity() {
         adView.loadAd(adRequest)
     }
 
-
-    private fun initDBPlaylist(playlistName: String){
-        favoriteBtn.setBackgroundResource(R.drawable.ic_baseline_favorite)
-        db = dbHelper.readableDatabase
-        val cursor: Cursor = db.rawQuery(
-            "SELECT * FROM $playlistName",null
-        )
-        viewModel?.parseDBData(cursor)
-        val manager = LinearLayoutManager(this)
-        rvPlaylist.apply {
-            layoutManager = manager
-            adapter = playlistAdapter
-            addOnScrollListener(object :RecyclerView.OnScrollListener(){
-                override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                    super.onScrollStateChanged(recyclerView, newState)
-                    if (newState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL){
-                        isScroll = true } }
-                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                    super.onScrolled(recyclerView, dx, dy)
-                    currentItem = manager.childCount
-                    totalItem = manager.itemCount
-                    scrollOutItem = manager.findFirstVisibleItemPosition()
-                    if (isScroll && (currentItem + scrollOutItem == totalItem)){
-                        isScroll = false
-                        } } } )
-        }
-        queueText.text = cursor.count.toString()
-        playlistService = viewModel?.playlistData!!
-        playlistAdapter.addListener = PlayerPlaylistAdapter.ItemClickListener { data ->
-            idAutoLoad =data.id
-            favoriteSetter()
-            dbSearchesUpdater(data.id,data.title,data.channelName,data.thumb)
-            playerTitle.text = data.title
-            playerPublisher.text = data.channelName
-            Glide.with(binding.root)
-                .load(data.thumb)
-                .dontAnimate()
-                .dontTransform()
-                .into(playerThumbnail)
-        }
-
-        viewModel?.playlistData?.observe(this) {
-            playlistAdapter.setDataDiff(it.items, rvPlaylist)
-            idAutoLoad = it.items[0].id
-            favoriteSetter()
-            playerTitle.text = it.items[0].title
-            playerPublisher.text = it.items[0].channelName
-            Glide.with(this)
-                .load(it.items[0].thumb)
-                .into(playerThumbnail)}
-    }
-
-
     @SuppressLint("SetTextI18n")
-    private fun initWebPlaylist() {
-        viewModel?.firsItem = DBModel.Items(firstID!!,firstName!!,firstPublisher!!,firstThumbnail!!)
-        viewModel?.relatedTo = firstID
+    private fun initRecyclerView(PlaylistName: String) {
+		if (PlaylistName != ""){
+			db = dbHelper.readableDatabase
+        	val cursor: Cursor = db.rawQuery("SELECT * FROM $playlistName", null)
+        	viewModel?.parseDBData(cursor)
+			cursor.postion(0)
+			viewModel?.relatedTo = cursor.getString(0)
+		}  else{
+			viewModel?.firsItem = DBModel.Items(firstID!!,firstName!!,firstPublisher!!,firstThumbnail!!)
+			viewModel?.relatedTo = firstID}
+        
+        
         viewModel?.getApiData()
 
         val manager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
