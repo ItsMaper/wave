@@ -30,6 +30,25 @@ class OnBackPlayer : Service() {
         setObservers()
         return START_STICKY
     }
+    
+    private fun playerNotification(){
+        val intent = Intent()
+        val pendingIntent: PendingIntent? = TaskStackBuilder.create(this).run {
+            addNextIntentWithParentStack(intent)
+            getPendingIntent(INTENT_REQUEST, PendingIntent.FLAG_UPDATE_CURRENT)
+        }
+        notificationStyle = NotificationCompat.Builder(this, channelId).also {
+            it.setSmallIcon(R.drawable.ic_wave_foreground)
+            it.setContentTitle(intent.getStringExtra("title"))
+            it.setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            it.addAction(R.drawable.ic_baseline_arrow_back_ios_24_notif, "Previous", pendingIntent)
+            it.addAction(R.drawable.ic_baseline_motion_photos_paused_24, "Pause", pendingIntent)
+            it.addAction(R.drawable.ic_baseline_arrow_forward_ios_24_notif, "Next", pendingIntent)
+            it.setStyle(
+                androidx.media.app.NotificationCompat.MediaStyle()
+                    .setShowActionsInCompactView())
+        }.build()
+    }
 
     private fun setObservers() {
         PlayerActivity.playlistService.observeForever {
