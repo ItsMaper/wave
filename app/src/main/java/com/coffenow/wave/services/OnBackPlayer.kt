@@ -1,9 +1,15 @@
 package com.coffenow.wave.services
 
-import android.app.Service
+import android.app.*
+import android.content.Context
 import android.content.Intent
-import android.os.IBinder
+import android.os.Build
+import android.widget.Toast
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
+import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.MutableLiveData
+import com.coffenow.wave.R
 import com.coffenow.wave.activities.PlayerActivity
 import com.coffenow.wave.model.DBModel
 import com.coffenow.wave.model.OnBackPlayerTime
@@ -13,70 +19,89 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.Abs
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.options.IFramePlayerOptions
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
 
-class OnBackPlayer : Service() {
+class OnBackPlayer : LifecycleService() {
 
     private lateinit var listener: AbstractYouTubePlayerListener
     private lateinit var playerView:YouTubePlayerView
-    private  var player : YouTubePlayer? = null
     private lateinit var opts : IFramePlayerOptions
-    private var playlist = MutableLiveData<DBModel>()
-    private var currentSoundID : MutableLiveData<String> = MutableLiveData("")
-    private var currentTitle = MutableLiveData<String>()
+    private var notificationIntent : String? = null
+    private var player : YouTubePlayer? = null
+    private var notificationID: Int = 0
+    private var currentTitle :String = ""
 
-    override fun onBind(intent: Intent): IBinder? =  null
+    companion object {
+        const val CHANNEL_ID = "WavePlayer"
+        const val PREV_INTENT_REQUEST = 1
+        const val NEXT_INTENT_REQUEST = 2
+        const val PAUSE_INTENT_REQUEST = 3
+
+        var playlist = MutableLiveData<DBModel>()
+        var currentSoundID = MutableLiveData<String>()
+    }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        setterBind()
-        setObservers()
-        return START_STICKY
-    }
-    
-    private fun playerNotification(){
-        val intent = Intent()
-        val pendingIntent: PendingIntent? = TaskStackBuilder.create(this).run {
-            addNextIntentWithParentStack(intent)
-            getPendingIntent(INTENT_REQUEST, PendingIntent.FLAG_UPDATE_CURRENT)
+        super.onStartCommand(intent, flags, startId)
+        notificationIntent = intent?.getStringExtra("notification")
+        notificationIntent.let { it1 ->
+            if (it1 == "next"){
+                PlayerActivity.currentQueue.value?.let {
+                    PlayerActivity.currentQueue.value = it+1
+                }
+            }else if (it1 == "previous"){
+                PlayerActivity.currentQueue.value?.let {
+                    PlayerActivity.currentQueue.value = it-1
+                }
+            } else if (it1== "pause"){
+                if (PlayerActivity.isPlaying.value == true){
+                    player?.pause()
+                }else{
+                    player?.play()
+                }
+            } else {
+
+            }
         }
-        notificationStyle = NotificationCompat.Builder(this, channelId).also {
-            it.setSmallIcon(R.drawable.ic_wave_foreground)
-            it.setContentTitle(intent.getStringExtra("title"))
-            it.setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            it.addAction(R.drawable.ic_baseline_arrow_back_ios_24_notif, "Previous", pendingIntent)
-            it.addAction(R.drawable.ic_baseline_motion_photos_paused_24, "Pause", pendingIntent)
-            it.addAction(R.drawable.ic_baseline_arrow_forward_ios_24_notif, "Next", pendingIntent)
-            it.setStyle(
-                androidx.media.app.NotificationCompat.MediaStyle()
-                    .setShowActionsInCompactView())
-        }.build()
+        createChannel()
+        setObservers()
+        setterBind()
+
+        return super.onStartCommand(intent, flags, startId)
     }
 
     private fun setObservers() {
-        PlayerActivity.playlistService.observeForever {
-            playlist.value = it
+        playlist.observeForever {
+            it.let { currentTitle = it.items[0].title
+                currentSoundID.value = it.items[0].id
+                Toast.makeText(this, currentSoundID.value, Toast.LENGTH_SHORT).show()
+                PlayerActivity.currentQueue.value = 0 }
         }
-
-        PlayerActivity.currentQueue.observeForever {it1->
-            playlist.observeForever {
-                currentSoundID.value = it.items[it1].id
-            }
-        }
-
-        PlayerActivity.userSecond.observeForever {
-            player?.seekTo(it)
-        }
-
-        PlayerActivity.playControl.observeForever {
-            if (it){
-                player?.play()
-            } else{
+        PlayerActivity.currentQueue.observeForever { it1 ->
                 player?.pause()
+                playlist.value?.let {
+                    currentTitle = it.items[it1].title
+                    currentSoundID.value = it.items[it1].id
+                }
             }
-        }
-        currentSoundID.observeForever {
-            player?.loadVideo(it, 0f)
-        }
-    }
+            PlayerActivity.userSecond.observeForever {
+                player?.pause()
+                player?.seekTo(it)
+                player?.play()
+            }
 
+            PlayerActivity.playControl.observeForever {
+                if (it) {
+                    player?.play()
+                } else {
+                    player?.pause()
+                }
+            }
+
+            currentSoundID.observeForever {
+                player?.loadVideo(it, 0f)
+                with(NotificationManagerCompat.from(this)) {
+                    notify(notificationID, notificationBuilder().build())
+            }
+    }}
     private fun setterBind() {
         playerView = YouTubePlayerView(this)
         opts = IFramePlayerOptions.Builder()
@@ -87,9 +112,9 @@ class OnBackPlayer : Service() {
             .build()
         listener = object : AbstractYouTubePlayerListener() {
             override fun onReady(youTubePlayer: YouTubePlayer) {
-                player = youTubePlayer
-                youTubePlayer.loadVideo(currentSoundID.value!!, 0F)
                 super.onReady(youTubePlayer)
+                player = youTubePlayer
+                currentSoundID.value?.let { player?.loadVideo(it, 0F) }
             }
 
             override fun onStateChange(youTubePlayer: YouTubePlayer, state: PlayerConstants.PlayerState) {
@@ -100,22 +125,24 @@ class OnBackPlayer : Service() {
             override fun onCurrentSecond(youTubePlayer: YouTubePlayer, second: Float) {
                 super.onCurrentSecond(youTubePlayer, second)
                 val time = second.toInt()
-                PlayerActivity.currentSecond.value = OnBackPlayerTime(time, formatTime(time))
-                if(PlayerActivity.currentSecond.value!!.seekBar == PlayerActivity.duration.value!!.seekBar){
-                    PlayerActivity.currentQueue.value = PlayerActivity.currentQueue.value!! + 1
+                if (PlayerActivity.isPlaying.value!!){
+                    PlayerActivity.currentSecond.value = OnBackPlayerTime(time)
+                }
+                if(PlayerActivity.currentSecond.value!!.time == PlayerActivity.duration.value!!.time - 1){
+                    PlayerActivity.currentQueue.value = PlayerActivity.currentQueue.value?.plus(1)
                 }
             }
 
             override fun onVideoDuration(youTubePlayer: YouTubePlayer, duration: Float) {
                 super.onVideoDuration(youTubePlayer, duration)
                 val time = duration.toInt()
-                PlayerActivity.duration.value = OnBackPlayerTime(time, formatTime(time))
+                PlayerActivity.duration.value = OnBackPlayerTime(time)
             }
 
             override fun onError(youTubePlayer: YouTubePlayer, error: PlayerConstants.PlayerError) {
                 super.onError(youTubePlayer, error)
-                PlayerActivity.currentQueue.value = PlayerActivity.currentQueue.value!! + 1
-                youTubePlayer.loadVideo(currentSoundID.value!!, 0F)
+                if (error == PlayerConstants.PlayerError.INVALID_PARAMETER_IN_REQUEST|| error == PlayerConstants.PlayerError.VIDEO_NOT_FOUND){
+                PlayerActivity.currentQueue.value = PlayerActivity.currentQueue.value!! + 1}
             }
         }
         playerView.enableAutomaticInitialization = false
@@ -124,40 +151,56 @@ class OnBackPlayer : Service() {
 
     }
 
-    private fun formatTime(t: Int) : String {
-        val hours = t / 3600
-        val minutes = (t % 3600) / 60
-        val seconds = t % 60
-        if (hours == 0) {
-            return if (minutes<=9){
-                if (seconds <= 9) {
-                    "0$minutes:0$seconds"
-                } else {
-                    "0$minutes:$seconds"
-                }
-            }else{
-                if (seconds <= 9) {
-                    "$minutes:0$seconds"
-                } else {
-                    "$minutes:$seconds"
-                }}
-        } else{
-            return if (minutes<=9){
-                if (seconds <= 9) {
-                    "$hours:0$minutes:0$seconds"
-                } else {
-                    "$hours:0$minutes:$seconds"
-                }
-            }else{
-                if (seconds <= 9) {
-                    "$hours:$minutes:0$seconds"
-                } else {
-                    "$hours:$minutes:$seconds"
-                }}
+    private fun createChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                CHANNEL_ID,
+                "WavePlayerChannel",
+                NotificationManager.IMPORTANCE_DEFAULT
+            )
+            val notificationManager: NotificationManager =
+                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+            notificationManager.createNotificationChannel(channel)
         }
     }
-    override fun onDestroy() {
-        super.onDestroy()
-        playerView.release()
+
+    private fun notificationBuilder(): NotificationCompat.Builder {
+        val contIntent = Intent(this, PlayerActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        val flag = PendingIntent.FLAG_IMMUTABLE
+        val contentIntent:PendingIntent = PendingIntent.getActivity(this, 0, contIntent, flag)
+
+        val prevIntent = Intent(this, OnBackPlayer::class.java).apply { flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK }
+        prevIntent.putExtra("notification", "previous")
+        val previuosIntent = PendingIntent.getActivity(this, PREV_INTENT_REQUEST, prevIntent, PendingIntent.FLAG_ONE_SHOT)
+
+        val nxtIntent = Intent(this, OnBackPlayer::class.java).apply { flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK }
+        nxtIntent.putExtra("notification", "next")
+        val nextIntent =PendingIntent.getActivity(this, NEXT_INTENT_REQUEST, nxtIntent,  PendingIntent.FLAG_ONE_SHOT)
+
+        val pausIntent = Intent(this, OnBackPlayer::class.java).apply { flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK }
+        pausIntent.putExtra("notification", "pause")
+        val pauseIntent = PendingIntent.getActivity(this, PAUSE_INTENT_REQUEST, pausIntent, PendingIntent.FLAG_ONE_SHOT)
+
+
+        val builder = NotificationCompat.Builder(this, CHANNEL_ID).also {
+            it.setSound(null)
+            it.setOngoing(true)
+            it.setSmallIcon(R.drawable.ic_wave_foreground)
+            it.setContentTitle(currentTitle)
+            it.setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            it.setContentIntent(contentIntent)
+            it.addAction(R.drawable.ic_baseline_arrow_back_ios_24_notif, "Previous", previuosIntent)
+            it.addAction(R.drawable.ic_baseline_motion_photos_paused_24, "Pause", pauseIntent)
+            it.addAction(R.drawable.ic_baseline_arrow_forward_ios_24_notif, "Next", nextIntent)
+            it.setStyle(
+                androidx.media.app.NotificationCompat.MediaStyle()
+                    .setShowActionsInCompactView())
+            it.priority = NotificationCompat.PRIORITY_DEFAULT
+        }
+
+        return builder
     }
 }

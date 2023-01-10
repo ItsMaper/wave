@@ -22,11 +22,13 @@ class PlayerViewModel : ViewModel() {
     private val _isAllDataOnlineLoaded = MutableLiveData<Boolean>()
     val isAllDataOnlineLoaded = _isAllDataOnlineLoaded
     private val _playList = MutableLiveData<DBModel>()
+    private val itemsToParse = ArrayList<DBModel.Items>()
     var playlistData = _playList
+    var first : Boolean = true
 
     fun getApiData(){
         _isLoading.value = true
-        val itemsToParse = ArrayList<DBModel.Items>()
+
         val client = YTApiConfig
             .getService()
             .getVideoRelated(
@@ -44,7 +46,9 @@ class PlayerViewModel : ViewModel() {
                         if (data.nextPageToken != null) { nextPageToken = data.nextPageToken }
                         else { _isAllDataOnlineLoaded.value = true }
                         if (data.items.isNotEmpty()){
-                            itemsToParse.add(firsItem)
+                            if(first){
+                                itemsToParse.add(firsItem)
+                            }
                             for (items in data.items){
                                 val thisItems = DBModel.Items(items.videoId.videoID!!, items.snippet.title, items.snippet.channelTitle, items.snippet.thumbnails.high.url)
                                 itemsToParse.add(thisItems)
@@ -62,8 +66,9 @@ class PlayerViewModel : ViewModel() {
     }
 
     fun parseDBData(cursor: Cursor){
-        val toParse = ArrayList<DBModel.Items>()
-        toParse.add(firsItem)
+        if (first){
+            itemsToParse.add(firsItem)
+        }
         var i = 0
         while (i < cursor.count){
             cursor.moveToPosition(i)
@@ -71,44 +76,16 @@ class PlayerViewModel : ViewModel() {
             val title = cursor.getString(1)
             val channel = cursor.getString(2)
             val thumb =cursor.getString(3)
-            toParse.add(DBModel.Items(id, title, channel, thumb))
+            itemsToParse.add(DBModel.Items(id, title, channel, thumb))
             i++
         }
-        playlistData.value = DBModel(toParse)
     }
 
-    fun formatTime(t: Int) : String {
-        val hours = t / 3600
-        val minutes = (t % 3600) / 60
-        val seconds = t % 60
-        if (hours == 0) {
-            return if (minutes<=9){
-                if (seconds <= 9) {
-                    "0$minutes:0$seconds"
-                } else {
-                    "0$minutes:$seconds"
-                }
-            }else{
-                if (seconds <= 9) {
-                    "$minutes:0$seconds"
-                } else {
-                    "$minutes:$seconds"
-                }}
-        } else{
-            return if (minutes<=9){
-                if (seconds <= 9) {
-                    "$hours:0$minutes:0$seconds"
-                } else {
-                    "$hours:0$minutes:$seconds"
-                }
-            }else{
-                if (seconds <= 9) {
-                    "$hours:$minutes:0$seconds"
-                } else {
-                    "$hours:$minutes:$seconds"
-                }}
-        }
+    fun parse(){
+        println(_playList.value)
     }
+
+
 
     companion object {
         private val TAG = PlayerViewModel::class.java.simpleName

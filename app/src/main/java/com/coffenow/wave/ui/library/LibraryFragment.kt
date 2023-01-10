@@ -90,10 +90,7 @@ class LibraryFragment : Fragment() {
             }
             initRecyclerView()
         }
-
     }
-
-
 
     private fun initRecyclerView() {
         db = dbHelper.readableDatabase

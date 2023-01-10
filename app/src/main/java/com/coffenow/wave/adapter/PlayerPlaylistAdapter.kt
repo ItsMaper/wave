@@ -2,6 +2,7 @@ package com.coffenow.wave.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
 import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -24,8 +25,7 @@ class PlayerPlaylistAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         val function = { pos: Int ->
             if (currentSelected.value == null || currentSelected.value != pos) {
                 currentSelected = MutableLiveData(pos)
-                notifyDataSetChanged()
-            }
+                notifyDataSetChanged()}
         }
         (holder as PPlaylistHolder).setData(playerItems[position],position == currentSelected.value, function, position)
     }

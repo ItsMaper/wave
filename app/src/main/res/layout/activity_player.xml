@@ -8,6 +8,18 @@
     app:layoutDescription="@xml/activity_player_scene"
     tools:context=".activities.PlayerActivity">
 
+    <Spinner
+        android:id="@+id/playerSpinnerOptions"
+        android:layout_width="26dp"
+        android:layout_height="26dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/ic_baseline_format_list"
+        android:contentDescription="@string/list_menu"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="TouchTargetSizeCheck" />
+
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/player_thumbnail"
         android:layout_width="0dp"
@@ -71,11 +83,11 @@
             android:layout_marginStart="10dp"
             android:layout_weight="0"
             android:maxLines="1"
+            android:text="@string/timer"
             android:textColor="@color/white"
             app:layout_constraintBottom_toBottomOf="@+id/playerSeek"
             app:layout_constraintEnd_toStartOf="@+id/playerSeek"
-            app:layout_constraintStart_toStartOf="parent"
-            tools:text="@tools:sample/date/hhmm" />
+            app:layout_constraintStart_toStartOf="parent" />
 
         <androidx.appcompat.widget.AppCompatSeekBar
             android:id="@+id/playerSeek"
@@ -94,11 +106,11 @@
             android:layout_marginEnd="10dp"
             android:layout_weight="0"
             android:maxLines="1"
+            android:text="@string/timer"
             android:textColor="@color/white"
             app:layout_constraintBottom_toBottomOf="@+id/playerSeek"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/playerSeek"
-            tools:text="@tools:sample/date/hhmm" />
+            app:layout_constraintStart_toEndOf="@+id/playerSeek" />
     </LinearLayout>
 
     <LinearLayout
@@ -248,6 +260,64 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/player_thumbnail" />
+
+    <FrameLayout
+        android:id="@+id/addToPlaylistPanel"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:drawable/screen_background_dark_transparent"
+        android:translationZ="10dp"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:visibilityMode="ignore"
+        tools:visibility="visible">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="150pt"
+            android:layout_height="180pt"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="50pt"
+            android:background="@drawable/rounded_panel">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/lv_playlists"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="50dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <Button
+                android:id="@+id/createPlaylist"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:background="@color/sub"
+                android:text="@string/createBtn"
+                android:visibility="invisible"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/lv_playlists" />
+
+            <Button
+                android:id="@+id/addBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="5dp"
+                android:background="@color/sub"
+                android:text="@string/addToPlaylist"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/lv_playlists" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </FrameLayout>
 
 
 </androidx.constraintlayout.motion.widget.MotionLayout>

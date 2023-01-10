@@ -30,11 +30,15 @@
     <string name="list_menu">options menu</string>
     <string name="songs">songs</string>
     <string name="favoriteSong">addFavorite</string>
+    <string name="addToPlaylist">add</string>
+    <string name="createBtn">create</string>
 
     <string-array name="MusicSpinnerOptions">
+        <item> </item>
         <item>Add to…</item>
         <item>Mark as favorite</item>
         <item>Download</item>
     </string-array>
+
 
 </resources>
