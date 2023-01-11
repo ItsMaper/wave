@@ -127,10 +127,20 @@
         app:layout_constraintStart_toStartOf="parent">
 
         <androidx.appcompat.widget.AppCompatImageButton
-            android:id="@+id/player_prev"
+            android:id="@+id/player_bucle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:backgroundTint="@android:color/transparent"
+            android:contentDescription="@string/bucle_btn"
+            android:tint="@android:color/darker_gray"
+            tools:ignore="TouchTargetSizeCheck,ImageContrastCheck" />
+
+        <androidx.appcompat.widget.AppCompatImageButton
+            android:id="@+id/player_prev"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
             android:backgroundTint="@android:color/transparent"
             android:contentDescription="@string/player_prev"
             tools:ignore="TouchTargetSizeCheck,ImageContrastCheck" />
@@ -139,7 +149,7 @@
             android:id="@+id/player_play"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight="2"
             android:backgroundTint="@android:color/transparent"
             android:contentDescription="@string/player_play"
             tools:ignore="TouchTargetSizeCheck,ImageContrastCheck" />
@@ -148,10 +158,24 @@
             android:id="@+id/player_next"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight="2"
             android:backgroundTint="@android:color/transparent"
             android:contentDescription="@string/player_next"
             tools:ignore="TouchTargetSizeCheck,ImageContrastCheck" />
+
+        <androidx.appcompat.widget.AppCompatImageButton
+            android:id="@+id/player_shuffle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:backgroundTint="@android:color/transparent"
+            android:contentDescription="@string/shuffle_btn"
+            android:tint="@android:color/darker_gray"
+            app:layout_constraintBottom_toBottomOf="@+id/queueText"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/currentWavelistText"
+            tools:ignore="TouchTargetSizeCheck,ImageContrastCheck" />
+
     </LinearLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -163,34 +187,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
-
-        <androidx.appcompat.widget.AppCompatImageButton
-            android:id="@+id/player_shuffle"
-            android:layout_width="10pt"
-            android:layout_height="10pt"
-            android:layout_marginStart="5pt"
-            android:backgroundTint="@android:color/transparent"
-            android:contentDescription="@string/shuffle_btn"
-            android:tint="@android:color/darker_gray"
-            app:layout_constraintBottom_toBottomOf="@+id/queueText"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/currentWavelistText"
-            app:srcCompat="@drawable/ic_outline_shuffle_24"
-            tools:ignore="TouchTargetSizeCheck" />
-
-        <androidx.appcompat.widget.AppCompatImageButton
-            android:id="@+id/player_bucle"
-            android:layout_width="10pt"
-            android:layout_height="10pt"
-            android:layout_marginEnd="5pt"
-            android:backgroundTint="@android:color/transparent"
-            android:contentDescription="@string/bucle_btn"
-            android:tint="@android:color/darker_gray"
-            app:layout_constraintBottom_toBottomOf="@+id/queueText"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/currentWavelistText"
-            app:srcCompat="@drawable/ic_baseline_repeat_24"
-            tools:ignore="TouchTargetSizeCheck" />
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/currentWavelistText"
@@ -214,9 +210,11 @@
             android:layout_marginStart="10dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="10dp"
+            android:layout_marginBottom="5dp"
             android:gravity="center"
             android:maxLines="1"
             android:textColor="@color/white"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/currentWavelistText"
@@ -267,13 +265,13 @@
         android:layout_height="match_parent"
         android:background="@android:drawable/screen_background_dark_transparent"
         android:translationZ="10dp"
-        android:visibility="invisible"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:visibilityMode="ignore"
-        tools:visibility="visible">
+        tools:visibility="gone">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="150pt"

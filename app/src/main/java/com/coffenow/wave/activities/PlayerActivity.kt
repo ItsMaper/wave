@@ -99,7 +99,8 @@ class PlayerActivity : AppCompatActivity() {
         setBind()
         clickListeners()
         setObserver()
-        if (playlistService?.value?.items != null){
+        if (playlistService?.value?.items != null && playlistName == null){
+            OnBackPlayer.fromNotifReturn.value = true
             viewModel?.playlistData = playlistService!!
         } else{
             getViewModel(playlistName!!)
@@ -129,9 +130,11 @@ class PlayerActivity : AppCompatActivity() {
         timeTotal = binding.timeText
         currentTime = binding.currentTimeText
         playlistLayout = binding.PPlaylistLayout
-        playBtn.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
-        prevBtn.setImageResource(R.drawable.ic_baseline_arrow_back_ios_24)
-        nextBtn.setImageResource(R.drawable.ic_baseline_arrow_forward_ios_24)
+        playBtn.setImageResource(R.drawable.ic_baseline_play_circle_outline_36)
+        prevBtn.setImageResource(R.drawable.ic_baseline_arrow_back_ios_36)
+        nextBtn.setImageResource(R.drawable.ic_baseline_arrow_forward_ios_36)
+        bucleBtn.setImageResource(R.drawable.ic_baseline_repeat_36)
+        shuffleBtn.setImageResource(R.drawable.ic_outline_shuffle_36)
         firstID = intent.getStringExtra("id")
         firstName = intent.getStringExtra("title")
         firstPublisher = intent.getStringExtra("publisher")
@@ -179,9 +182,9 @@ class PlayerActivity : AppCompatActivity() {
     private fun setObserver() {
         isPlaying.observe(this){
             if (it){
-                playBtn.setImageResource(R.drawable.ic_baseline_motion_photos_paused_24)
+                playBtn.setImageResource(R.drawable.ic_baseline_motion_photos_paused_36)
             } else{
-                playBtn.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
+                playBtn.setImageResource(R.drawable.ic_baseline_play_circle_outline_36)
             }
         }
         duration.observe(this){
@@ -206,14 +209,19 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private fun getViewModel(PlaylistName: String){
+        duration.value = OnBackPlayerTime(0)
+        currentSecond.value = OnBackPlayerTime(0)
+        seekBar.progress = 0
+        currentTime.text = resources.getText(R.string.timer)
+        timeTotal.text = resources.getText(R.string.timer)
+
         if (PlaylistName == "searches" || PlaylistName == "default"){
             viewModel?.firsItem = DBModel.Items(firstID!!,firstName!!,firstPublisher!!,firstThumbnail!!)
         }
         if (PlaylistName != "default"){
             db = dbHelper.readableDatabase
             val cursor: Cursor = db.rawQuery("SELECT * FROM $playlistName", null)
-            if(PlaylistName == "searches"){
-                viewModel?.first = true }
+            viewModel?.first = PlaylistName == "searches"
             viewModel?.parseDBData(cursor)
             cursor.moveToFirst()
             viewModel?.relatedTo = cursor.getString(0)
@@ -223,7 +231,6 @@ class PlayerActivity : AppCompatActivity() {
         viewModel?.getApiData()
         playlistService = viewModel?.playlistData!!
         OnBackPlayer.playlist = playlistService!!
-        currentQueue.value = 0
     }
 
     @SuppressLint("SetTextI18n")
@@ -314,7 +321,7 @@ class PlayerActivity : AppCompatActivity() {
         currentTime.text= resources.getText(R.string.timer)
         if (isNext){
             currentQueue.value?.let {
-                if (it < playlistAdapter.itemCount-1){
+                if (it < PlayerPlaylistAdapter.itemsSize.value!!-1){
                     currentQueue.value = it+1
                 }else{
                     currentQueue.value = 0
@@ -328,7 +335,6 @@ class PlayerActivity : AppCompatActivity() {
                         timeTotal.text = resources.getText(R.string.timer)
                         currentTime.text = resources.getText(R.string.timer)
                     } }
-
             }
         playlistService?.observe(this) { data ->
             currentQueue.observe(this){

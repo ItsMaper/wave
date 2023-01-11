@@ -16,6 +16,10 @@ class PlayerPlaylistAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     var currentSelected :  MutableLiveData<Int> = MutableLiveData(0)
     var addListener: ItemClickListener? = null
 
+    companion object{
+        val itemsSize = MutableLiveData<Int>()
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val view = PlayerItemPlaylistBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return PPlaylistHolder(view)
@@ -29,7 +33,10 @@ class PlayerPlaylistAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         }
         (holder as PPlaylistHolder).setData(playerItems[position],position == currentSelected.value, function, position)
     }
-    override fun getItemCount(): Int = playerItems.size
+    override fun getItemCount(): Int {
+        itemsSize.value = playerItems.size
+        return playerItems.size
+    }
 
     inner class PPlaylistHolder(itemView: PlayerItemPlaylistBinding) : RecyclerView.ViewHolder(itemView.root){
         private val binding = itemView

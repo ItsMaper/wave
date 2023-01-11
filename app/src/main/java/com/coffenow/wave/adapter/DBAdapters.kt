@@ -71,62 +71,6 @@ class RecyclerSearchesByDB : RecyclerView.Adapter<RecyclerView.ViewHolder>(){
     }
 }
 
-class RecyclerPlayerPlaylistByDB : RecyclerView.Adapter<RecyclerView.ViewHolder>(){
-    var currentSelected: Int? = 0
-    var addListener: ItemClickListener? = null
-    private var playerItems = ArrayList<DBModel.Items>()
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        val view = PlayerItemPlaylistBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return ItemHolder(view)
-    }
-    override fun getItemCount(): Int {
-        return playerItems.size
-    }
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        val function = { pos: Int ->
-            if (currentSelected == null || currentSelected != pos) {
-                currentSelected = pos
-                notifyDataSetChanged()
-            }
-        }
-        (holder as ItemHolder).setData(playerItems[position],position == currentSelected, function, position)
-    }
-
-    inner class ItemHolder (itemView: PlayerItemPlaylistBinding) : RecyclerView.ViewHolder(itemView.root){
-        private val binding = itemView
-        fun setData(data:DBModel.Items, selected: Boolean, function: (Int) -> Unit, position: Int){
-            binding.root.isSelected = selected
-            binding.root.setOnClickListener {
-                function(position)
-                if (!selected){
-                    addListener?.onClick(data)
-                }
-            }
-            binding.tvPpTitle.text =data.title
-            Glide.with(binding.root)
-                .load(data.thumb)
-                .into(binding.ppThumbnail)
-        }
-
-    }
-
-    fun setDataDiff(newList: List<DBModel.Items>, rv: RecyclerView){
-        val playlistDiff = PlaylistDiffUtil(playerItems, newList)
-        val diff = DiffUtil.calculateDiff(playlistDiff)
-        playerItems.addAll(newList)
-        diff.dispatchUpdatesTo(this)
-        rv.scrollToPosition(playerItems.size - newList.size)
-    }
-
-    fun interface ItemClickListener {
-        fun onClick(data: DBModel.Items)
-    }
-
-}
-
-
-
 class RecyclerPlaylistByDB : RecyclerView.Adapter<RecyclerView.ViewHolder>(){
     lateinit var context: Context
     private lateinit var cursor: Cursor

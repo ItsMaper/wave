@@ -31,7 +31,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Wave"
         tools:targetApi="31">
-
         <activity
             android:name=".activities.SplashScreen"
             android:exported="true"
@@ -62,6 +61,7 @@
                 android:name="android.app.lib_name"
                 android:value="" />
         </activity>
+        <receiver android:name=".receivers.NotificationReceiver" />
         <service
             android:name=".services.OnBackPlayer"
             android:enabled="true"
