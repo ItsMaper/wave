@@ -37,7 +37,7 @@ class WaveDBHelper(context:Context): SQLiteOpenHelper(context, "wave.db", null, 
         val db = this.readableDatabase
         val cursor = db.rawQuery("SELECT * FROM $tableName;", null)
         if(cursor!=null){
-            if (cursor.count > 25 ){
+            if (cursor.count >= 25 ){
                 cursor.close()
                 return true
             }

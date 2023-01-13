@@ -133,7 +133,6 @@
             android:layout_weight="1"
             android:backgroundTint="@android:color/transparent"
             android:contentDescription="@string/bucle_btn"
-            android:tint="@android:color/darker_gray"
             tools:ignore="TouchTargetSizeCheck,ImageContrastCheck" />
 
         <androidx.appcompat.widget.AppCompatImageButton
@@ -170,7 +169,6 @@
             android:layout_weight="1"
             android:backgroundTint="@android:color/transparent"
             android:contentDescription="@string/shuffle_btn"
-            android:tint="@android:color/darker_gray"
             app:layout_constraintBottom_toBottomOf="@+id/queueText"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/currentWavelistText"

@@ -35,7 +35,7 @@ class PlayerViewModel : ViewModel() {
                 "snippet",
                 relatedTo,
                 "video",
-                "15",
+                "22",
                 nextPageToken)
         client.enqueue(object : Callback<YTModel> {
             override fun onResponse(call: Call<YTModel>, response: Response<YTModel>) {

@@ -13,6 +13,7 @@ import android.view.View
 import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
+import android.view.animation.AlphaAnimation
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -30,6 +31,12 @@ import com.coffenow.wave.db.WaveDBHelper
 import com.coffenow.wave.model.DBModel
 import com.coffenow.wave.model.OnBackPlayerTime
 import com.coffenow.wave.services.OnBackPlayer
+import com.coffenow.wave.services.OnBackPlayer.Companion.currentQueue
+import com.coffenow.wave.services.OnBackPlayer.Companion.isBucle
+import com.coffenow.wave.services.OnBackPlayer.Companion.isPlaying
+import com.coffenow.wave.services.OnBackPlayer.Companion.isShuffled
+import com.coffenow.wave.services.OnBackPlayer.Companion.playControl
+import com.coffenow.wave.services.OnBackPlayer.Companion.playlistService
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.MobileAds
 import kotlinx.coroutines.*
@@ -74,15 +81,10 @@ class PlayerActivity : AppCompatActivity() {
     private var scrollOutItem = -1
     private var fromUser = false
 
-
     companion object{
-        var isPlaying : MutableLiveData<Boolean> = MutableLiveData(false)
-        var playControl = MutableLiveData<Boolean>()
         var duration = MutableLiveData<OnBackPlayerTime>()
         var currentSecond = MutableLiveData<OnBackPlayerTime>()
         var userSecond = MutableLiveData<Float>()
-        var playlistService : MutableLiveData<DBModel>?= null
-        var currentQueue = MutableLiveData<Int>()
     }
 
     override fun onCreateView(name: String, context: Context, attrs: AttributeSet): View? {
@@ -135,6 +137,8 @@ class PlayerActivity : AppCompatActivity() {
         nextBtn.setImageResource(R.drawable.ic_baseline_arrow_forward_ios_36)
         bucleBtn.setImageResource(R.drawable.ic_baseline_repeat_36)
         shuffleBtn.setImageResource(R.drawable.ic_outline_shuffle_36)
+        shuffleBtn.alpha = 0.70f
+        bucleBtn.alpha = 0.70f
         firstID = intent.getStringExtra("id")
         firstName = intent.getStringExtra("title")
         firstPublisher = intent.getStringExtra("publisher")
@@ -172,6 +176,14 @@ class PlayerActivity : AppCompatActivity() {
         prevBtn.setOnClickListener {
             webQueueManagement(false) }
 
+        shuffleBtn.setOnClickListener {
+            isShuffled.value = isShuffled.value != true
+        }
+
+        bucleBtn.setOnClickListener {
+            isBucle.value = isBucle.value != true
+        }
+
         addToBtn.setOnClickListener {
             addToLayout.visibility = INVISIBLE
             fromUser = false
@@ -187,10 +199,26 @@ class PlayerActivity : AppCompatActivity() {
                 playBtn.setImageResource(R.drawable.ic_baseline_play_circle_outline_36)
             }
         }
+        isShuffled.observe(this){
+            if (it){
+                shuffleBtn.alpha = 1f
+            }else{
+                shuffleBtn.alpha = 0.70f
+            }
+        }
+
+        isBucle.observe(this){
+            if (it){
+                bucleBtn.alpha = 1f
+            }else{
+                bucleBtn.alpha = 0.70f
+            }
+        }
         duration.observe(this){
             seekBar.max =it.time
             timeTotal.text = formatTime(it.time)
         }
+
         currentSecond.observe(this){
             seekBar.progress = it.time
             currentTime.text = formatTime(it.time)
@@ -230,7 +258,6 @@ class PlayerActivity : AppCompatActivity() {
 
         viewModel?.getApiData()
         playlistService = viewModel?.playlistData!!
-        OnBackPlayer.playlist = playlistService!!
     }
 
     @SuppressLint("SetTextI18n")
@@ -252,10 +279,8 @@ class PlayerActivity : AppCompatActivity() {
                     scrollOutItem = manager.findFirstVisibleItemPosition()
                     if (isScroll && (currentItem + scrollOutItem == totalItem)){
                         isScroll = false
-                        if (!isLoading && totalItem<=12){
+                        if (!isLoading && totalItem<=20){
                             viewModel?.getApiData() } } } } ) }
-
-
 
         playlistAdapter.addListener = PlayerPlaylistAdapter.ItemClickListener { data ->
             dbSearchesUpdater(data.id,data.title,data.channelName,data.thumb)
@@ -320,11 +345,15 @@ class PlayerActivity : AppCompatActivity() {
         seekBar.progress=0
         currentTime.text= resources.getText(R.string.timer)
         if (isNext){
-            currentQueue.value?.let {
-                if (it < PlayerPlaylistAdapter.itemsSize.value!!-1){
-                    currentQueue.value = it+1
+            currentQueue.value?.let { it1 ->
+                if (it1 < PlayerPlaylistAdapter.itemsSize.value!!-1){
+                    currentQueue.value = it1+1
                 }else{
-                    currentQueue.value = 0
+                    isBucle.value?.let {
+                        if(it){
+                            currentQueue.value = 0
+                        }
+                    }
                 }
                 timeTotal.text = resources.getText(R.string.timer)
                 currentTime.text = resources.getText(R.string.timer)
