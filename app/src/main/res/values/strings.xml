@@ -22,6 +22,7 @@
     <string name="empty"></string>
     <string name="local">Local</string>
     <string name="online">Online</string>
+    <string name="quick">Quick Play</string>
     <string name="current_unavailable">Current Unavailable</string>
     <string name="isEmpty">Cannot set empty value</string>
     <string name="queue">Current Wave</string>
@@ -31,6 +32,7 @@
     <string name="songs">songs</string>
     <string name="favoriteSong">addFavorite</string>
     <string name="addToPlaylist">add</string>
+    <string name="SelectPlaylist">Select A Playlist</string>
     <string name="createBtn">create</string>
 
     <string-array name="MusicSpinnerOptions">
@@ -39,6 +41,8 @@
         <item>Mark as favorite</item>
         <item>Download</item>
     </string-array>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 
 </resources>

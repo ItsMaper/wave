@@ -13,19 +13,7 @@
         <OnClick motion:targetId="@+id/PPlaylistLayout" />
     </Transition>
 
-    <ConstraintSet android:id="@+id/start">
-        <Constraint
-            android:id="@+id/addToPlaylistPanel"
-            motion:layout_constraintEnd_toEndOf="parent"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            motion:layout_constraintBottom_toBottomOf="parent"
-            motion:layout_constraintTop_toTopOf="parent"
-            android:translationZ="10dp"
-            motion:layout_constraintStart_toStartOf="parent"
-            motion:visibilityMode="ignore"
-            app:visibilityMode="ignore"/>
-    </ConstraintSet>
+    <ConstraintSet android:id="@+id/start"></ConstraintSet>
 
     <ConstraintSet android:id="@+id/end">
         <Constraint
@@ -86,15 +74,21 @@
             android:id="@+id/PPlaylistLayout"
             motion:layout_constraintTop_toBottomOf="@id/adView" />
         <Constraint
-            android:id="@+id/addToPlaylistPanel"
+            android:id="@+id/rv_PPlaylist"
             motion:layout_constraintEnd_toEndOf="parent"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            motion:layout_constraintBottom_toBottomOf="parent"
-            motion:layout_constraintTop_toTopOf="parent"
-            android:translationZ="10dp"
+            android:layout_height="0dp"
+            motion:layout_constraintTop_toBottomOf="@+id/PPlaylistLayout"
+            android:translationZ="5dp"
             motion:layout_constraintStart_toStartOf="parent"
-            motion:visibilityMode="ignore"
-            app:visibilityMode="ignore"/>
+            motion:layout_constrainedHeight="true" />
+        <Constraint
+            android:id="@+id/rv_PPlaylist"
+            motion:layout_constraintEnd_toEndOf="parent"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            motion:layout_constraintTop_toBottomOf="@+id/PPlaylistLayout"
+            android:translationZ="5dp"
+            motion:layout_constraintStart_toStartOf="parent" />
     </ConstraintSet>
 </MotionScene>

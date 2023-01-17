@@ -20,57 +20,6 @@ import com.coffenow.wave.diffutils.PlaylistDiffUtil
 import com.coffenow.wave.model.DBModel
 import com.coffenow.wave.model.DBPlaylistModel
 
-class RecyclerSearchesByDB : RecyclerView.Adapter<RecyclerView.ViewHolder>(){
-    lateinit var context: Context
-    private lateinit var cursor: Cursor
-    private var items = ArrayList<DBModel.Items>()
-
-    fun rvSet(context: Context, cursor: Cursor){
-        this.context=context
-        this.cursor=cursor
-    }
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        val view = OnlineMusicBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return ItemHolder(view)
-    }
-
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        cursor.moveToPosition(position)
-        val videoID = cursor.getString(0)
-        val name = cursor.getString(1)
-        val publisher = cursor.getString(2)
-        val thumb = cursor.getString(3)
-        items.add(DBModel.Items(videoID,name,publisher,thumb))
-        (holder as ItemHolder).setData(items[position])
-    }
-
-    inner class ItemHolder (itemView: OnlineMusicBinding) : RecyclerView.ViewHolder(itemView.root){
-        private val binding = itemView
-        fun setData(data:DBModel.Items){
-            binding.root.setOnClickListener {
-                val i = Intent(it.context, PlayerActivity::class.java)
-                i.putExtra("type", "web")
-                i.putExtra("playlist","searches")
-                i.putExtra("id", data.id)
-                i.putExtra("title", data.title)
-                i.putExtra("publisher", data.channelName)
-                i.putExtra("thumbnail", data.thumb)
-                it.context.startActivity(i)
-            }
-            binding.onlineTitle.text =data.title
-            binding.onlinePublisher.text =data.channelName
-            Glide.with(context)
-                .load(data.thumb)
-                .into(binding.onlineThumbnail)
-        }
-
-    }
-    override fun getItemCount(): Int {
-        return cursor.count
-    }
-}
-
 class RecyclerPlaylistByDB : RecyclerView.Adapter<RecyclerView.ViewHolder>(){
     lateinit var context: Context
     private lateinit var cursor: Cursor
@@ -99,7 +48,6 @@ class RecyclerPlaylistByDB : RecyclerView.Adapter<RecyclerView.ViewHolder>(){
             binding.root.setOnClickListener {
                 if(getCount(data.title) > 0){
                     val i = Intent(it.context, PlayerActivity::class.java)
-                    i.putExtra("type", "web")
                     i.putExtra("playlist" , data.title)
                     it.context.startActivity(i)
                 } else{

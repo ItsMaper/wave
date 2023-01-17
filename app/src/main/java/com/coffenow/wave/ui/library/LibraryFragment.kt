@@ -39,14 +39,11 @@ class LibraryFragment : Fragment() {
     private lateinit var saveBtn :Button
     private lateinit var inputEditText: EditText
     private lateinit var addBtn: ImageButton
-
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         playlistViewModel = ViewModelProvider(this)[LibraryViewModel::class.java]
         _binding = FragmentLibraryBinding.inflate(inflater, container, false)
         return binding.root
     }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setBinding()

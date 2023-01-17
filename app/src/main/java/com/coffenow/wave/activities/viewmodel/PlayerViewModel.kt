@@ -2,14 +2,17 @@ package com.coffenow.wave.activities.viewmodel
 
 import android.database.Cursor
 import android.util.Log
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.*
+import androidx.lifecycle.Observer
 import com.coffenow.wave.model.DBModel
 import com.coffenow.wave.model.YTModel
 import com.coffenow.wave.network.YTApiConfig
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.util.*
+import kotlin.collections.ArrayList
+
 
 class PlayerViewModel : ViewModel() {
     var relatedTo : String?= null
@@ -22,20 +25,19 @@ class PlayerViewModel : ViewModel() {
     private val _isAllDataOnlineLoaded = MutableLiveData<Boolean>()
     val isAllDataOnlineLoaded = _isAllDataOnlineLoaded
     private val _playList = MutableLiveData<DBModel>()
-    private val itemsToParse = ArrayList<DBModel.Items>()
     var playlistData = _playList
     var first : Boolean = true
 
     fun getApiData(){
+        val itemsToParse = ArrayList<DBModel.Items>()
         _isLoading.value = true
-
         val client = YTApiConfig
             .getService()
             .getVideoRelated(
                 "snippet",
                 relatedTo,
                 "video",
-                "22",
+                "50",
                 nextPageToken)
         client.enqueue(object : Callback<YTModel> {
             override fun onResponse(call: Call<YTModel>, response: Response<YTModel>) {
@@ -53,7 +55,12 @@ class PlayerViewModel : ViewModel() {
                                 val thisItems = DBModel.Items(items.videoId.videoID!!, items.snippet.title, items.snippet.channelTitle, items.snippet.thumbnails.high.url)
                                 itemsToParse.add(thisItems)
                             }
-                            _playList.value = DBModel(itemsToParse)
+                            playlistData.value?.items.let {
+                                if(it!=null){
+                                    itemsToParse.addAll(it)
+                                }
+                                playlistData.value = DBModel(itemsToParse)
+                            }
                         }
                     }
                     else { _message.value = "No Music" }
@@ -66,25 +73,24 @@ class PlayerViewModel : ViewModel() {
     }
 
     fun parseDBData(cursor: Cursor){
-        if (first){
-            itemsToParse.add(firsItem)
-        }
+        val itemsToParse = ArrayList<DBModel.Items>()
         var i = 0
-        while (i < cursor.count){
+        while (i < cursor.count-1){
             cursor.moveToPosition(i)
             val id = cursor.getString(0)
             val title = cursor.getString(1)
             val channel = cursor.getString(2)
-            val thumb =cursor.getString(3)
+            val thumb = cursor.getString(3)
             itemsToParse.add(DBModel.Items(id, title, channel, thumb))
             i++
         }
+        _playList.value?.items.let {
+            if(it!=null){
+                itemsToParse.addAll(it)
+            }
+            _playList.value = DBModel(itemsToParse)
+        }
     }
-
-    fun parse(){
-        println(_playList.value)
-    }
-
 
 
     companion object {

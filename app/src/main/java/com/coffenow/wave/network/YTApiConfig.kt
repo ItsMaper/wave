@@ -23,6 +23,7 @@ class YTApiConfig {
                         .request()
                         .url
                         .newBuilder()
+                        .addQueryParameter("videoSyndicated", "true")
                         .addQueryParameter("videoEmbeddable", "true")
                         .addQueryParameter("key", BuildConfig.YOUTUBE_API_KEY)
                         .build()

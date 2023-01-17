@@ -10,10 +10,6 @@ import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
 import android.util.AttributeSet
 import android.view.View
-import android.view.View.INVISIBLE
-import android.view.View.VISIBLE
-import android.view.ViewGroup
-import android.view.animation.AlphaAnimation
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -24,7 +20,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.coffenow.wave.R
 import com.coffenow.wave.activities.viewmodel.PlayerViewModel
-import com.coffenow.wave.adapter.AddToPlaylist
 import com.coffenow.wave.adapter.PlayerPlaylistAdapter
 import com.coffenow.wave.databinding.ActivityPlayerBinding
 import com.coffenow.wave.db.WaveDBHelper
@@ -32,10 +27,12 @@ import com.coffenow.wave.model.DBModel
 import com.coffenow.wave.model.OnBackPlayerTime
 import com.coffenow.wave.services.OnBackPlayer
 import com.coffenow.wave.services.OnBackPlayer.Companion.currentQueue
+import com.coffenow.wave.services.OnBackPlayer.Companion.fromNotifReturn
 import com.coffenow.wave.services.OnBackPlayer.Companion.isBucle
 import com.coffenow.wave.services.OnBackPlayer.Companion.isPlaying
 import com.coffenow.wave.services.OnBackPlayer.Companion.isShuffled
 import com.coffenow.wave.services.OnBackPlayer.Companion.playControl
+import com.coffenow.wave.services.OnBackPlayer.Companion.player
 import com.coffenow.wave.services.OnBackPlayer.Companion.playlistService
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.MobileAds
@@ -51,7 +48,6 @@ class PlayerActivity : AppCompatActivity() {
     private lateinit var dbHelper: WaveDBHelper
     private lateinit var db: SQLiteDatabase
     private lateinit var rvPlaylist: RecyclerView
-    private lateinit var addToLayout : FrameLayout
     private lateinit var playerTitle: TextView
     private lateinit var playerPublisher: TextView
     private lateinit var playerThumbnail: ImageView
@@ -61,8 +57,7 @@ class PlayerActivity : AppCompatActivity() {
     private lateinit var bucleBtn:ImageButton
     private lateinit var shuffleBtn:ImageButton
     private lateinit var favoriteBtn: ImageButton
-    private lateinit var addToBtn: Button
-    private lateinit var spinnerOptions: Spinner
+    private lateinit var addToBtn: ImageButton
     private lateinit var seekBar: SeekBar
     private lateinit var timeTotal : TextView
     private lateinit var currentTime : TextView
@@ -79,7 +74,6 @@ class PlayerActivity : AppCompatActivity() {
     private var currentItem = -1
     private var totalItem = -1
     private var scrollOutItem = -1
-    private var fromUser = false
 
     companion object{
         var duration = MutableLiveData<OnBackPlayerTime>()
@@ -101,8 +95,8 @@ class PlayerActivity : AppCompatActivity() {
         setBind()
         clickListeners()
         setObserver()
-        if (playlistService?.value?.items != null && playlistName == null){
-            OnBackPlayer.fromNotifReturn.value = true
+        if (playlistName == null  && player != null){
+            fromNotifReturn = true
             viewModel?.playlistData = playlistService!!
         } else{
             getViewModel(playlistName!!)
@@ -114,8 +108,6 @@ class PlayerActivity : AppCompatActivity() {
     private fun setBind() {
         dbHelper = WaveDBHelper(this)
         rvPlaylist = binding.rvPPlaylist
-        addToLayout = binding.addToPlaylistPanel
-        addToLayout.visibility = INVISIBLE
         playerTitle = binding.playerTitle
         playerPublisher = binding.playerPublisher
         queueText = binding.queueText
@@ -126,17 +118,16 @@ class PlayerActivity : AppCompatActivity() {
         bucleBtn=binding.playerBucle
         shuffleBtn=binding.playerShuffle
         favoriteBtn = binding.favoriteButton
-        addToBtn = binding.addBtn
-        spinnerOptions = binding.playerSpinnerOptions
+        addToBtn = binding.addToPlaylistBtn
         seekBar = binding.playerSeek
         timeTotal = binding.timeText
         currentTime = binding.currentTimeText
         playlistLayout = binding.PPlaylistLayout
-        playBtn.setImageResource(R.drawable.ic_baseline_play_circle_outline_36)
-        prevBtn.setImageResource(R.drawable.ic_baseline_arrow_back_ios_36)
-        nextBtn.setImageResource(R.drawable.ic_baseline_arrow_forward_ios_36)
-        bucleBtn.setImageResource(R.drawable.ic_baseline_repeat_36)
-        shuffleBtn.setImageResource(R.drawable.ic_outline_shuffle_36)
+        playBtn.setImageResource(R.drawable.icon_player_play)
+        prevBtn.setImageResource(R.drawable.icon_player_back)
+        nextBtn.setImageResource(R.drawable.icon_player_next)
+        bucleBtn.setImageResource(R.drawable.icon_player_bucle)
+        shuffleBtn.setImageResource(R.drawable.icon_player_shuffle)
         shuffleBtn.alpha = 0.70f
         bucleBtn.alpha = 0.70f
         firstID = intent.getStringExtra("id")
@@ -144,11 +135,15 @@ class PlayerActivity : AppCompatActivity() {
         firstPublisher = intent.getStringExtra("publisher")
         firstThumbnail = intent.getStringExtra("thumbnail")
         playlistName = intent.getStringExtra("playlist")
-        setSpinner()
-        setAddPlaylist()
         setWebSeekBar()
     }
 
+    override fun onBackPressed() {
+        super.onBackPressed()
+        val intent = Intent(this, MainActivity::class.java)
+        startActivity(intent)
+        finish()
+    }
     private fun clickListeners() {
         favoriteBtn.setOnClickListener {
             val pos = currentQueue.value!!
@@ -183,10 +178,9 @@ class PlayerActivity : AppCompatActivity() {
         bucleBtn.setOnClickListener {
             isBucle.value = isBucle.value != true
         }
-
         addToBtn.setOnClickListener {
-            addToLayout.visibility = INVISIBLE
-            fromUser = false
+            val fragment : androidx.fragment.app.DialogFragment = com.coffenow.wave.ui.popUps.AddToPlaylist(this)
+            fragment.show(supportFragmentManager, "Select")
         }
 
     }
@@ -194,35 +188,34 @@ class PlayerActivity : AppCompatActivity() {
     private fun setObserver() {
         isPlaying.observe(this){
             if (it){
-                playBtn.setImageResource(R.drawable.ic_baseline_motion_photos_paused_36)
-            } else{
-                playBtn.setImageResource(R.drawable.ic_baseline_play_circle_outline_36)
-            }
-        }
+                playBtn.setImageResource(R.drawable.icon_player_paused) } else{
+                playBtn.setImageResource(R.drawable.icon_player_play) } }
+
         isShuffled.observe(this){
             if (it){
-                shuffleBtn.alpha = 1f
-            }else{
-                shuffleBtn.alpha = 0.70f
-            }
-        }
+                shuffleBtn.alpha = 1f }else{
+                shuffleBtn.alpha = 0.70f } }
 
         isBucle.observe(this){
             if (it){
-                bucleBtn.alpha = 1f
-            }else{
-                bucleBtn.alpha = 0.70f
-            }
-        }
+                bucleBtn.alpha = 1f }else{
+                bucleBtn.alpha = 0.70f } }
+
         duration.observe(this){
-            seekBar.max =it.time
-            timeTotal.text = formatTime(it.time)
-        }
+            if(it.time == 0){
+                currentTime.text = resources.getText(R.string.timer)
+                timeTotal.text = resources.getText(R.string.timer)}else{
+                seekBar.max =it.time
+                timeTotal.text = formatTime(it.time) } }
 
         currentSecond.observe(this){
+            if(it.time == 0){
+                currentTime.text = resources.getText(R.string.timer)
+                timeTotal.text = resources.getText(R.string.timer)
+                seekBar.progress = 0 }else{
             seekBar.progress = it.time
-            currentTime.text = formatTime(it.time)
-        }
+            currentTime.text = formatTime(it.time)} }
+
         currentQueue.observe(this){
             playlistService?.observe(this) { data ->
                 idAutoLoad = data.items[it].id
@@ -231,32 +224,30 @@ class PlayerActivity : AppCompatActivity() {
                 playerPublisher.text = data.items[it].channelName
                 Glide.with(this)
                     .load(data.items[it].thumb)
-                    .into(playerThumbnail)
-            }
-        }
+                    .into(playerThumbnail) } }
+
     }
 
     private fun getViewModel(PlaylistName: String){
         duration.value = OnBackPlayerTime(0)
         currentSecond.value = OnBackPlayerTime(0)
         seekBar.progress = 0
-        currentTime.text = resources.getText(R.string.timer)
-        timeTotal.text = resources.getText(R.string.timer)
+        db = dbHelper.readableDatabase
 
-        if (PlaylistName == "searches" || PlaylistName == "default"){
+        if (PlaylistName == "default"){
+            viewModel?.first = true
             viewModel?.firsItem = DBModel.Items(firstID!!,firstName!!,firstPublisher!!,firstThumbnail!!)
-        }
-        if (PlaylistName != "default"){
-            db = dbHelper.readableDatabase
+            viewModel?.relatedTo = firstID
+            viewModel?.getApiData() }else{
+            viewModel?.first = false
             val cursor: Cursor = db.rawQuery("SELECT * FROM $playlistName", null)
-            viewModel?.first = PlaylistName == "searches"
-            viewModel?.parseDBData(cursor)
-            cursor.moveToFirst()
-            viewModel?.relatedTo = cursor.getString(0)
-        }  else{
-            viewModel?.relatedTo = firstID}
+            if (cursor.moveToFirst()){
+                val rand: Int = (0 until (cursor.count-1)).random()
+                cursor.move(rand)
+                viewModel?.relatedTo = cursor.getString(0)
+                viewModel?.parseDBData(cursor)
+                cursor.close() } }
 
-        viewModel?.getApiData()
         playlistService = viewModel?.playlistData!!
     }
 
@@ -277,94 +268,37 @@ class PlayerActivity : AppCompatActivity() {
                     currentItem = manager.childCount
                     totalItem = manager.itemCount
                     scrollOutItem = manager.findFirstVisibleItemPosition()
-                    if (isScroll && (currentItem + scrollOutItem == totalItem)){
+                    /*if (isScroll && (currentItem + scrollOutItem == totalItem)){
                         isScroll = false
                         if (!isLoading && totalItem<=20){
-                            viewModel?.getApiData() } } } } ) }
+                            viewModel?.getApiData() } }*/ } } ) }
 
         playlistAdapter.addListener = PlayerPlaylistAdapter.ItemClickListener { data ->
-            dbSearchesUpdater(data.id,data.title,data.channelName,data.thumb)
             idAutoLoad = data.id
             currentQueue.value = playlistAdapter.currentSelected.value
-            favoriteSetter()
-        }
+            favoriteSetter()}
 
         playlistService?.observe(this) {
+            playlistAdapter.clearAll()
             playlistAdapter.setDataDiff(it.items, rvPlaylist)
             idAutoLoad = it.items[0].id
             favoriteSetter() }
     }
 
-    private fun setAddPlaylist() {
-        val rv= binding.lvPlaylists
-        val db = dbHelper.readableDatabase
-        val cursor = db.rawQuery("SELECT * FROM playlists",null)
-        rv.layoutManager = LinearLayoutManager(this)
-        rv.adapter = AddToPlaylist(cursor)
-    }
-
-    private fun setSpinner() {
-        val data : Array<String> = resources.getStringArray(R.array.MusicSpinnerOptions)
-        val spinnerAdapter: ArrayAdapter<*> =
-            object : ArrayAdapter<String?>(this, android.R.layout.simple_spinner_item, data) {
-                override fun getDropDownView(
-                    position: Int,
-                    convertView: View?,
-                    parent: ViewGroup
-                ): View? {
-                    fromUser  = true
-                    return super.getDropDownView(position+1, convertView, parent)
-                }
-
-                override fun getCount(): Int {
-                    return data.size - 1
-                }
-            }
-        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-
-        spinnerOptions.adapter = spinnerAdapter
-        spinnerOptions.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
-            override fun onItemSelected(
-                parent: AdapterView<*>?,
-                view: View?,
-                position: Int,
-                id: Long
-            ) {
-                if (position == 0 && fromUser){
-                    addToLayout.visibility = VISIBLE
-                }
-            }
-
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-            }
-        }
-    }
-
     private fun webQueueManagement(isNext : Boolean) {
         isPlaying.value = false
         seekBar.progress=0
-        currentTime.text= resources.getText(R.string.timer)
         if (isNext){
             currentQueue.value?.let { it1 ->
                 if (it1 < PlayerPlaylistAdapter.itemsSize.value!!-1){
-                    currentQueue.value = it1+1
-                }else{
+                    currentQueue.value = it1+1 }else{
                     isBucle.value?.let {
                         if(it){
-                            currentQueue.value = 0
-                        }
-                    }
-                }
-                timeTotal.text = resources.getText(R.string.timer)
-                currentTime.text = resources.getText(R.string.timer)
-            } } else {
+                            currentQueue.value = 0 } } } } } else {
                 currentQueue.value?.let {
                     if (it > 0 ){
-                        currentQueue.value = it - 1
-                        timeTotal.text = resources.getText(R.string.timer)
-                        currentTime.text = resources.getText(R.string.timer)
-                    } }
-            }
+                        currentQueue.value = it - 1 } } }
+
         playlistService?.observe(this) { data ->
             currentQueue.observe(this){
                 idAutoLoad = data.items[it].id
@@ -391,9 +325,9 @@ class PlayerActivity : AppCompatActivity() {
 
     private fun favoriteSetter() {
         if (isFavorite()){
-            favoriteBtn.setBackgroundResource(R.drawable.ic_baseline_favorite)
+            favoriteBtn.setBackgroundResource(R.drawable.icon_player_favorite)
         } else {
-            favoriteBtn.setBackgroundResource(R.drawable.ic_baseline_favorite_border)
+            favoriteBtn.setBackgroundResource(R.drawable.icon_player_favorite_border)
         }
     }
     private fun isFavorite(): Boolean{
@@ -401,17 +335,6 @@ class PlayerActivity : AppCompatActivity() {
         val sql = "SELECT * FROM favorites WHERE videoID LIKE('$idAutoLoad')"
         val cursor = db.rawQuery(sql, null)
         return cursor.moveToFirst()
-    }
-
-    private fun dbSearchesUpdater(id: String?, name:String?, publisher:String?, thumb:String?){
-        if(!id.isNullOrEmpty() && !name.isNullOrEmpty() && !publisher.isNullOrEmpty() && !thumb.isNullOrEmpty() ){
-            val data = ContentValues()
-            data.put("videoID",id)
-            data.put("title", name)
-            data.put("publisher", publisher)
-            data.put("thumbnail", thumb)
-            dbHelper.addData("searches", data)
-        }
     }
 
     private fun initService() {

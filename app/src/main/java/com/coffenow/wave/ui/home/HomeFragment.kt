@@ -6,8 +6,6 @@ import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
 import android.view.*
-import android.view.View.INVISIBLE
-import android.view.View.VISIBLE
 import android.widget.AbsListView
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
@@ -18,7 +16,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.coffenow.wave.R
 import com.coffenow.wave.adapter.OnlineMusicAdapter
-import com.coffenow.wave.adapter.RecyclerSearchesByDB
 import com.coffenow.wave.databinding.FragmentHomeBinding
 import com.coffenow.wave.db.WaveDBHelper
 
@@ -42,8 +39,9 @@ class HomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         appContext= requireContext().applicationContext
         dbHelper = WaveDBHelper(appContext)
-        OnlineData().start()
-
+        getViewModel()
+        initRecyclerView()
+        setSearch()
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -63,32 +61,24 @@ class HomeFragment : Fragment() {
                 return true } }
         return false }
 
-    inner class OnlineData {
-        fun start(){
-            setSearch()
-            if (dbHelper.isFilled("searches")){
-                initDBRecyclerView()
-            } else{
-                viewModel?.querySearch = resources.getString(R.string.search_bar)
-                viewModel?.getOnlineList()
-                initOnlineRecyclerView()}
-        }
 
-        private fun initDBRecyclerView() {
-            db = dbHelper.readableDatabase
-            val cursor:Cursor= db.rawQuery(
-                "SELECT * FROM searches",null
-            )
-            val dbAdapter = RecyclerSearchesByDB()
-            dbAdapter.rvSet(appContext, cursor)
-            val manager = LinearLayoutManager(requireContext())
-            binding.rvOnlineMusic.apply {
-                layoutManager = manager
-                adapter = dbAdapter
-            }
+    private fun getViewModel(){
+        viewModel?.clearAll()
+        db = dbHelper.readableDatabase
+        val cursor: Cursor = db.rawQuery("SELECT * FROM searches", null)
+        if (cursor.moveToFirst()){
+            val rand: Int = (0 until (cursor.count-1)).random()
+            cursor.move(rand)
+            viewModel?.relatedTo = cursor.getString(0)
+            viewModel?.getApiDataRelated()
+            viewModel?.parseDBData(cursor)
+        }else{
+            viewModel?.querySearch = resources.getString(R.string.search_bar)
+            viewModel?.getApiDataQuery()
         }
+    }
 
-        private fun initOnlineRecyclerView() {
+    private fun initRecyclerView() {
             val manager = LinearLayoutManager(requireContext())
             binding.rvOnlineMusic.apply {
                 adapter = onlineAdapter
@@ -108,12 +98,13 @@ class HomeFragment : Fragment() {
 
                         if (isScroll && (currentItem + scrollOutItem == totalItem)){
                             isScroll = false
-                            if (!isLoading && totalItem<=23){
-                                if (!isAllVideoLoaded){ viewModel?.getOnlineList() } } } } })
-                viewModel?.onlineData?.observe(viewLifecycleOwner) {
+                              } } })
+
+                viewModel?.dataLoaded?.observe(viewLifecycleOwner) {
                     if (it != null && it.items.isNotEmpty()) {
-                        onlineAdapter.setDataDiff(it.items, binding.rvOnlineMusic) } } }
-        }
+                        onlineAdapter.clearAll()
+                        onlineAdapter.setDataDiff(it.items, binding.rvOnlineMusic)
+                    } } } }
 
         private fun setSearch() {
             val searchManager = requireActivity().getSystemService(Context.SEARCH_SERVICE) as SearchManager
@@ -127,23 +118,23 @@ class HomeFragment : Fragment() {
                         viewModel?.querySearch = q
                         onlineAdapter.clearAll()
                         searchView.clearFocus()
-                        viewModel?.getOnlineList()
-                        binding.rvOnlineMusic.scrollToPosition(0)
-}
+                        viewModel?.getApiDataQuery()
+                        binding.rvOnlineMusic.scrollToPosition(0) }
                     return true }
                 override fun onQueryTextChange(newText: String): Boolean {
                     if (newText.isEmpty()){
                         viewModel?.querySearch = resources.getString(R.string.search_bar)
                         viewModel?.nextPageToken = null
                         onlineAdapter.clearAll()
+                        getViewModel()
                         searchView.clearFocus()
-                        binding.rvOnlineMusic.scrollToPosition(0)
-                        viewModel?.getOnlineList()
-                        }
+                        binding.rvOnlineMusic.scrollToPosition(0) }
                     return false } }) }
+
+    override fun onResume() {
+        super.onResume()
+        binding.rvOnlineMusic.scrollToPosition(0)
     }
-
-
     override fun onDestroy() {
         super.onDestroy()
         dbHelper.close()

@@ -6,6 +6,8 @@
     <color name="blue">#00098A</color>
     <color name="dark_greenBlue">#19426E</color>
     <color name="light_greenBlue">#0A1867</color>
+    <color name="transparent_gray_blue">#8001032B</color>
+    <color name="transparent">#00FFFFFF</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 </resources>

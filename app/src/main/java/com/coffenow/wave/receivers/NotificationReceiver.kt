@@ -8,6 +8,7 @@ import com.coffenow.wave.adapter.PlayerPlaylistAdapter
 import com.coffenow.wave.adapter.PlayerPlaylistAdapter.Companion.itemsSize
 import com.coffenow.wave.services.OnBackPlayer
 import com.coffenow.wave.services.OnBackPlayer.Companion.currentQueue
+import com.coffenow.wave.services.OnBackPlayer.Companion.fromNotifReturn
 import com.coffenow.wave.services.OnBackPlayer.Companion.isBucle
 import com.coffenow.wave.services.OnBackPlayer.Companion.isPlaying
 import com.coffenow.wave.services.OnBackPlayer.Companion.playControl
