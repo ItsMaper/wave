@@ -10,9 +10,9 @@ import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.coffenow.wave.R
-import com.coffenow.wave.adapter.RecyclerPlaylistByDB
+import com.coffenow.wave.adapter.PlaylistsByDB
 import com.coffenow.wave.databinding.FragmentAddToPlaylistBinding
-import com.coffenow.wave.db.WaveDBHelper
+import com.coffenow.wave.utils.WaveDBHelper
 
 class AddToPlaylist(context: Context) : DialogFragment() {
     private var _binding: FragmentAddToPlaylistBinding? = null
@@ -41,11 +41,11 @@ class AddToPlaylist(context: Context) : DialogFragment() {
 
     private fun initRecyclerView() {
         db = dbHelper.readableDatabase
-        val dbAdapter = RecyclerPlaylistByDB()
+        val dbAdapter = PlaylistsByDB()
         val cursor: Cursor = db.rawQuery(
             "SELECT * FROM playlists",null
         )
-        dbAdapter.rvSet(appContext, cursor)
+        //dbAdapter.rvSet(appContext, cursor)
         val manager = LinearLayoutManager(requireContext())
         binding.lvPlaylists.apply {
             layoutManager = manager

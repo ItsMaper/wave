@@ -5,114 +5,60 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:translationZ="50dp"
+
     tools:context=".ui.library.LibraryFragment">
 
-    <FrameLayout
-        android:id="@+id/newPlaylistPanel"
-        android:layout_width="320dp"
-        android:layout_height="150dp"
-        android:background="@drawable/rounded_frame"
-        android:translationZ="10dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+    <TextView
+        android:id="@+id/libraryTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="4dp"
+        android:text="@string/title_library"
+        android:textColor="@color/white"
+        android:textSize="30sp"
+        android:textStyle="normal|bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent" />
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+    <ImageButton
+        android:id="@+id/create_playlist"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@color/transparent"
+        android:contentDescription="@string/addPlaylist"
+        android:minWidth="48dp"
+        android:minHeight="48dp"
+        android:src="@drawable/icon_add_plus"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/libraryTV" />
 
-            <TextView
-                android:id="@+id/textView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:fontFamily="sans-serif-medium"
-                android:text="@string/addPlaylist"
-                android:textAllCaps="true"
-                android:textColor="@color/white"
-                android:textSize="18sp"
-                android:textStyle="italic"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <EditText
-                android:id="@+id/playlistName"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:ems="10"
-                android:focusableInTouchMode="true"
-                android:importantForAutofill="no"
-                android:inputType="textPersonName"
-                android:minHeight="48dp"
-                android:singleLine="true"
-                android:textAlignment="center"
-                android:textColor="@color/white"
-                android:textColorHint="@android:color/darker_gray"
-                android:textStyle="italic"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textView"
-                tools:ignore="SpeakableTextPresentCheck" />
-
-            <Button
-                android:id="@+id/save_btn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="10dp"
-                android:layout_marginBottom="10dp"
-                android:background="@android:color/transparent"
-                android:text="@string/save"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-    </FrameLayout>
-
-    <androidx.appcompat.widget.SearchView
-        android:id="@+id/svList"
-        android:layout_width="match_parent"
-        android:layout_height="35dp"
-        android:layout_marginStart="50dp"
-        android:layout_marginTop="5dp"
-        android:layout_marginEnd="50dp"
-        android:background="@drawable/rounded_sv_borders"
-        android:focusable="false"
-        android:focusableInTouchMode="true"
-        android:searchIcon="@drawable/icon_search"
+    <EditText
+        android:id="@+id/sv_music"
+        android:layout_width="80pt"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:hint="@string/search"
+        android:imeOptions="actionDone"
+        android:inputType="text"
+        android:maxLines="1"
+        android:minHeight="48dp"
+        android:singleLine="true"
+        android:textAlignment="center"
+        android:textColorHint="@android:color/darker_gray"
         android:translationZ="1dp"
-        app:iconifiedByDefault="false"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-    </androidx.appcompat.widget.SearchView>
+        app:layout_constraintBottom_toBottomOf="@+id/libraryTV"
+        app:layout_constraintEnd_toStartOf="@+id/create_playlist"
+        app:layout_constraintStart_toEndOf="@+id/libraryTV"
+        app:layout_constraintTop_toTopOf="@+id/libraryTV" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_playlist"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/svList" />
-
-    <ImageButton
-        android:id="@+id/new_list"
-        android:layout_width="22pt"
-        android:layout_height="22pt"
-        android:layout_marginEnd="15dp"
-        android:layout_marginBottom="10dp"
-        android:background="@drawable/rounded_sv_borders"
-        android:backgroundTint="@color/sub"
-        android:contentDescription="@string/new_playlist"
-        android:src="@drawable/icon_add_plus"
-        app:layout_constraintBottom_toTopOf="@+id/adView2"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/libraryTV" />
 
     <com.google.android.gms.ads.AdView
         android:id="@+id/adView2"
@@ -120,11 +66,14 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
+        android:layout_marginBottom="30pt"
         android:translationZ="1dp"
         app:adSize="BANNER"
         app:adUnitId="ca-app-pub-3940256099942544/6300978111"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
+
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -20,6 +20,8 @@
     <!--FILLING TEXTS-->
     <string name="timer">00:00</string>
     <string name="empty"></string>
+    <string name="clikeable">drop</string>
+    <string name="search">search</string>
     <string name="local">Local</string>
     <string name="online">Online</string>
     <string name="quick">Quick Play</string>

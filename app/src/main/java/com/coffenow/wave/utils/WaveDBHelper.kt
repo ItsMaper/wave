@@ -1,4 +1,4 @@
-package com.coffenow.wave.db
+package com.coffenow.wave.utils
 
 import android.content.ContentValues
 import android.content.Context

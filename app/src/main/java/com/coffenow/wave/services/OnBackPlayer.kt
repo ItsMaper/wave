@@ -1,10 +1,13 @@
 package com.coffenow.wave.services
 
+import android.Manifest
 import android.app.*
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.LifecycleService
@@ -14,7 +17,7 @@ import com.coffenow.wave.activities.PlayerActivity
 import com.coffenow.wave.activities.PlayerActivity.Companion.currentSecond
 import com.coffenow.wave.activities.PlayerActivity.Companion.duration
 import com.coffenow.wave.adapter.PlayerPlaylistAdapter
-import com.coffenow.wave.db.WaveDBHelper
+import com.coffenow.wave.utils.WaveDBHelper
 import com.coffenow.wave.model.DBModel
 import com.coffenow.wave.model.OnBackPlayerTime
 import com.coffenow.wave.receivers.NotificationReceiver
@@ -90,7 +93,11 @@ class OnBackPlayer : LifecycleService() {
         isPlaying.observeForever {
             if (currentTitle!=""){
                 with(NotificationManagerCompat.from(this)) {
-                    notify(notificationID, notificationBuilder().build()) } } }
+                    if (ActivityCompat.checkSelfPermission(applicationContext, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED){
+
+                    } else{
+                        notify(notificationID, notificationBuilder().build())
+                    } } } }
 
         currentSoundID.observeForever {
             if (!fromNotifReturn){
@@ -160,19 +167,20 @@ class OnBackPlayer : LifecycleService() {
             val channel = NotificationChannel(
                 CHANNEL_ID,
                 "Wave Player",
-                NotificationManager.IMPORTANCE_DEFAULT
+                NotificationManager.IMPORTANCE_LOW
             )
+            channel.setSound(null, null)
             val notificationManager: NotificationManager =
                 getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)
         } }
 
     private fun notificationBuilder(): NotificationCompat.Builder {
-        val contIntent = Intent(this, PlayerActivity::class.java)
+        val contIntent = Intent(this, PlayerActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK }
         contIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK ; Intent.FLAG_ACTIVITY_CLEAR_TASK;
         val flag = PendingIntent.FLAG_IMMUTABLE
         val contentIntent:PendingIntent = PendingIntent.getActivity(this, 0, contIntent, flag)
-
         val prevIntent = Intent(this, NotificationReceiver::class.java).apply { flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK }
         prevIntent.putExtra("notification", "previous")
         val previousIntent = PendingIntent.getBroadcast(this, PREV_INTENT_REQUEST, prevIntent, flag)
@@ -200,7 +208,8 @@ class OnBackPlayer : LifecycleService() {
             it.setStyle(
                 androidx.media.app.NotificationCompat.MediaStyle()
                     .setShowActionsInCompactView())
-            it.priority = NotificationCompat.PRIORITY_DEFAULT }
+            it.priority = NotificationCompat.PRIORITY_DEFAULT
+        }
         return builder
     }
     private fun dbSearchesUpdater(id: String?, name:String?, publisher:String?, thumb:String?){

@@ -22,7 +22,7 @@ class PlayerPlaylistAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val view = PlayerItemPlaylistBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return PPlaylistHolder(view)
+        return DataHolder(view)
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
@@ -31,14 +31,14 @@ class PlayerPlaylistAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                 currentSelected = MutableLiveData(pos)
                 notifyDataSetChanged()}
         }
-        (holder as PPlaylistHolder).setData(playerItems[position],position == currentSelected.value, function, position)
+        (holder as DataHolder).setData(playerItems[position],position == currentSelected.value, function, position)
     }
     override fun getItemCount(): Int {
         itemsSize.value = playerItems.size
         return playerItems.size
     }
 
-    inner class PPlaylistHolder(itemView: PlayerItemPlaylistBinding) : RecyclerView.ViewHolder(itemView.root){
+    inner class DataHolder(itemView: PlayerItemPlaylistBinding) : RecyclerView.ViewHolder(itemView.root){
         private val binding = itemView
 
         fun setData(data: DBModel.Items, selected: Boolean,
@@ -54,6 +54,7 @@ class PlayerPlaylistAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             binding.tvPpTitle.text = data.title
             Glide.with(binding.root)
                 .load(data.thumb)
+                .centerCrop()
                 .into(binding.ppThumbnail)
         }
     }
@@ -64,6 +65,7 @@ class PlayerPlaylistAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         diff.dispatchUpdatesTo(this)
         rv.scrollToPosition(playerItems.size - newList.size)
     }
+
     fun clearAll(){
         playerItems.clear()
     }

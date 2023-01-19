@@ -7,22 +7,27 @@ import android.content.Context
 import android.content.Intent
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.AttributeSet
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
+import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
 import com.coffenow.wave.R
 import com.coffenow.wave.activities.viewmodel.PlayerViewModel
 import com.coffenow.wave.adapter.PlayerPlaylistAdapter
 import com.coffenow.wave.databinding.ActivityPlayerBinding
-import com.coffenow.wave.db.WaveDBHelper
 import com.coffenow.wave.model.DBModel
 import com.coffenow.wave.model.OnBackPlayerTime
 import com.coffenow.wave.services.OnBackPlayer
@@ -34,6 +39,7 @@ import com.coffenow.wave.services.OnBackPlayer.Companion.isShuffled
 import com.coffenow.wave.services.OnBackPlayer.Companion.playControl
 import com.coffenow.wave.services.OnBackPlayer.Companion.player
 import com.coffenow.wave.services.OnBackPlayer.Companion.playlistService
+import com.coffenow.wave.utils.WaveDBHelper
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.MobileAds
 import kotlinx.coroutines.*
@@ -57,23 +63,43 @@ class PlayerActivity : AppCompatActivity() {
     private lateinit var bucleBtn:ImageButton
     private lateinit var shuffleBtn:ImageButton
     private lateinit var favoriteBtn: ImageButton
-    private lateinit var addToBtn: ImageButton
+    private lateinit var addToBtn : ImageButton
     private lateinit var seekBar: SeekBar
     private lateinit var timeTotal : TextView
     private lateinit var currentTime : TextView
-    private lateinit var playlistLayout: ConstraintLayout
+    private lateinit var title:TextView
     private lateinit var queueText: TextView
+
     private var playlistName: String? =null
+    private var playlistFromQuery: String? =null
     private var idAutoLoad:String? = null
     private var firstID : String? = null
     private var firstName :String? = null
     private var firstPublisher:String? = null
     private var firstThumbnail:String? = null
-    private var isLoading = false
     private var isScroll = false
     private var currentItem = -1
     private var totalItem = -1
     private var scrollOutItem = -1
+
+    private val glideCall = object : RequestListener<Drawable>{
+        override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>?, isFirstResource: Boolean): Boolean {
+            return false
+        }
+
+        override fun onResourceReady(resource: Drawable?, model: Any?, target: Target<Drawable>?, dataSource: DataSource?, isFirstResource: Boolean): Boolean {
+            val bitmap = resource!!.toBitmap()
+            var paletteGlide : Palette? = null
+            Palette.from(bitmap).generate {
+                it?.let { paletteGlide= it }
+            }
+            if (paletteGlide != null){
+                setVibrantPalette(paletteGlide!!)
+            }
+            return false
+        }
+
+    }
 
     companion object{
         var duration = MutableLiveData<OnBackPlayerTime>()
@@ -95,11 +121,16 @@ class PlayerActivity : AppCompatActivity() {
         setBind()
         clickListeners()
         setObserver()
-        if (playlistName == null  && player != null){
+        if (playlistName == null && player != null){
             fromNotifReturn = true
             viewModel?.playlistData = playlistService!!
         } else{
-            getViewModel(playlistName!!)
+            if(playlistFromQuery!=null){
+                title.text = playlistFromQuery
+                getViewModel(false)
+            } else{
+                getViewModel(true)
+                }
         }
         initRecyclerView()
         initAdsView()
@@ -107,27 +138,28 @@ class PlayerActivity : AppCompatActivity() {
 
     private fun setBind() {
         dbHelper = WaveDBHelper(this)
+        title = binding.playerPlaylistTitle
         rvPlaylist = binding.rvPPlaylist
-        playerTitle = binding.playerTitle
-        playerPublisher = binding.playerPublisher
+        playerTitle = binding.titleTV
         queueText = binding.queueText
-        playerThumbnail= binding.playerThumbnail
-        playBtn = binding.playerPlay
-        prevBtn = binding.playerPrev
-        nextBtn = binding.playerNext
-        bucleBtn=binding.playerBucle
-        shuffleBtn=binding.playerShuffle
-        favoriteBtn = binding.favoriteButton
+        playerPublisher = binding.publisherTV
+        playerThumbnail = binding.thumbIV
+        playBtn = binding.playBTN
+        prevBtn = binding.previousBTN
+        nextBtn = binding.nextBTN
+        bucleBtn=binding.bucleBTN
+        shuffleBtn= binding.shuffleBTN
+        favoriteBtn = binding.favoriteBTN
         addToBtn = binding.addToPlaylistBtn
         seekBar = binding.playerSeek
-        timeTotal = binding.timeText
-        currentTime = binding.currentTimeText
-        playlistLayout = binding.PPlaylistLayout
+        timeTotal = binding.totalTimeTV
+        currentTime = binding.currentTimeTV
         playBtn.setImageResource(R.drawable.icon_player_play)
         prevBtn.setImageResource(R.drawable.icon_player_back)
         nextBtn.setImageResource(R.drawable.icon_player_next)
         bucleBtn.setImageResource(R.drawable.icon_player_bucle)
         shuffleBtn.setImageResource(R.drawable.icon_player_shuffle)
+        addToBtn.setImageResource(R.drawable.icon_add_to_playlist)
         shuffleBtn.alpha = 0.70f
         bucleBtn.alpha = 0.70f
         firstID = intent.getStringExtra("id")
@@ -135,9 +167,11 @@ class PlayerActivity : AppCompatActivity() {
         firstPublisher = intent.getStringExtra("publisher")
         firstThumbnail = intent.getStringExtra("thumbnail")
         playlistName = intent.getStringExtra("playlist")
+        playlistFromQuery = intent.getStringExtra("query")
         setWebSeekBar()
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         super.onBackPressed()
         val intent = Intent(this, MainActivity::class.java)
@@ -184,6 +218,13 @@ class PlayerActivity : AppCompatActivity() {
         }
 
     }
+        private fun setVibrantPalette(paletteGlide: Palette){
+            val swatchDarkVibrant = paletteGlide.darkVibrantSwatch
+            if(swatchDarkVibrant!= null){
+                binding.playerContainer.setBackgroundColor(swatchDarkVibrant.rgb)
+            }
+        }
+
 
     private fun setObserver() {
         isPlaying.observe(this){
@@ -224,30 +265,39 @@ class PlayerActivity : AppCompatActivity() {
                 playerPublisher.text = data.items[it].channelName
                 Glide.with(this)
                     .load(data.items[it].thumb)
-                    .into(playerThumbnail) } }
+                    .centerCrop()
+                    .listener(glideCall)
+                    .into(playerThumbnail) }
+            }
 
     }
 
-    private fun getViewModel(PlaylistName: String){
+    private fun getViewModel(fromPlaylist: Boolean){
         duration.value = OnBackPlayerTime(0)
         currentSecond.value = OnBackPlayerTime(0)
         seekBar.progress = 0
         db = dbHelper.readableDatabase
 
-        if (PlaylistName == "default"){
-            viewModel?.first = true
-            viewModel?.firsItem = DBModel.Items(firstID!!,firstName!!,firstPublisher!!,firstThumbnail!!)
-            viewModel?.relatedTo = firstID
-            viewModel?.getApiData() }else{
+        if (fromPlaylist){
+            if (playlistName == "default"){
+                viewModel?.first = true
+                viewModel?.firsItem = DBModel.Items(firstID!!,firstName!!,firstPublisher!!,firstThumbnail!!)
+                viewModel?.relatedTo = firstID
+                viewModel?.getApiData() }else{
+                viewModel?.first = false
+                title.text = playlistName
+                val cursor: Cursor = db.rawQuery("SELECT * FROM $playlistName", null)
+                if (cursor.moveToFirst()){
+                    val rand: Int = (0 until (cursor.count-1)).random()
+                    cursor.move(rand)
+                    viewModel?.relatedTo = cursor.getString(0)
+                    viewModel?.parseDBData(cursor)
+                    cursor.close() } }
+        } else{
             viewModel?.first = false
-            val cursor: Cursor = db.rawQuery("SELECT * FROM $playlistName", null)
-            if (cursor.moveToFirst()){
-                val rand: Int = (0 until (cursor.count-1)).random()
-                cursor.move(rand)
-                viewModel?.relatedTo = cursor.getString(0)
-                viewModel?.parseDBData(cursor)
-                cursor.close() } }
-
+            viewModel?.querySearch = playlistFromQuery
+            viewModel?.getApiDataQuery()
+        }
         playlistService = viewModel?.playlistData!!
     }
 
@@ -307,6 +357,8 @@ class PlayerActivity : AppCompatActivity() {
                 playerPublisher.text = data.items[it].channelName
                 Glide.with(this)
                     .load(data.items[it].thumb)
+                    .centerCrop()
+                    .listener(glideCall)
                     .into(playerThumbnail)}
         }
     }

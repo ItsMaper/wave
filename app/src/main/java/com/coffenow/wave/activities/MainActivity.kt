@@ -1,6 +1,7 @@
 package com.coffenow.wave.activities
 
 import android.content.Intent
+import android.graphics.drawable.AnimationDrawable
 import android.os.Bundle
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
@@ -22,6 +23,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         supportActionBar?.hide()
         appBar()
+        setBackground()
     }
 
     private fun appBar() {
@@ -31,6 +33,15 @@ class MainActivity : AppCompatActivity() {
         val navController = findNavController(R.id.nav_host_fragment_activity_main)
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
+    }
+
+    private fun setBackground(){
+        val layout = binding.mainContainer
+        val animation : AnimationDrawable = layout.background as AnimationDrawable
+        animation.setEnterFadeDuration(5000)
+        animation.setExitFadeDuration(8000)
+        animation.start()
+
     }
 
 

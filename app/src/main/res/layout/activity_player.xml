@@ -4,116 +4,143 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/home_gradient2"
+    android:background="@drawable/background_gradient2"
     app:layoutDescription="@xml/activity_player_scene"
-    tools:context=".activities.PlayerActivity">
+    tools:context=".activities.PlayerActivity"
+    android:id="@+id/player_container">
 
-    <androidx.appcompat.widget.AppCompatImageButton
+    <TextView
+        android:id="@+id/playerPlaylistTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="@string/app_name"
+        android:textAlignment="center"
+        android:textAllCaps="true"
+        android:textColor="@color/white"
+        android:textSize="32sp"
+        android:textStyle="normal|bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageButton
         android:id="@+id/addToPlaylist_btn"
-        android:layout_width="26dp"
-        android:layout_height="26dp"
-        android:layout_marginTop="8dp"
+        android:layout_width="38dp"
+        android:layout_height="38dp"
         android:layout_marginEnd="8dp"
-        android:background="@drawable/icon_add_to_playlist"
+        android:background="@color/transparent"
         android:contentDescription="@string/save"
         android:translationZ="1dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@+id/imageFrame"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/imageFrame"
+        app:layout_constraintTop_toTopOf="@+id/imageFrame"
         tools:ignore="TouchTargetSizeCheck" />
 
-    <com.google.android.material.imageview.ShapeableImageView
-        android:id="@+id/player_thumbnail"
-        android:layout_width="0dp"
-        android:layout_height="200dp"
-        android:layout_marginStart="20pt"
-        android:layout_marginEnd="20pt"
+
+    <ImageButton
+        android:id="@+id/favoriteBTN"
+        android:layout_width="38dp"
+        android:layout_height="38dp"
+        android:layout_marginEnd="8pt"
+        android:layout_marginBottom="8pt"
+        android:background="@android:color/transparent"
+        android:contentDescription="@string/favoriteSong"
         android:translationZ="1dp"
+        app:layout_constraintBottom_toTopOf="@+id/playerSeek"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:ignore="ImageContrastCheck,TouchTargetSizeCheck" />
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/imageFrame"
+        android:layout_width="180dp"
+        android:layout_height="200dp"
+        android:layout_marginTop="8dp"
+        android:translationZ="1dp"
+        app:cardCornerRadius="8pt"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:ignore="ImageContrastCheck" />
+        app:layout_constraintTop_toBottomOf="@+id/playerPlaylistTitle">
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/thumbIV"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="@string/empty"
+            tools:layout_editor_absoluteX="84dp"
+            tools:layout_editor_absoluteY="228dp"
+            tools:srcCompat="@tools:sample/avatars" />
+    </androidx.cardview.widget.CardView>
 
     <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/player_title"
-        android:layout_width="0dp"
+        android:id="@+id/titleTV"
+        android:layout_width="220dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:gravity="center_horizontal"
+        android:layout_marginTop="8dp"
+        android:ellipsize="end"
         android:maxLines="2"
+        android:text="@string/empty"
         android:textAlignment="center"
-        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
         android:textColor="@color/white"
+        android:textSize="20sp"
+        android:textStyle="bold"
         android:translationZ="1dp"
-        app:layout_constraintBottom_toTopOf="@+id/player_publisher"
-
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/imageFrame"
+        app:layout_constraintStart_toStartOf="@+id/imageFrame"
+        app:layout_constraintTop_toBottomOf="@+id/imageFrame"
         tools:text="@tools:sample/full_names" />
 
     <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/player_publisher"
-        android:layout_width="match_parent"
+        android:id="@+id/publisherTV"
+        android:layout_width="220dp"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
+        android:layout_marginTop="8dp"
         android:gravity="center_horizontal"
         android:textColor="@color/white"
+        android:textStyle="italic"
         android:translationZ="1dp"
-        app:layout_constraintBottom_toTopOf="@+id/seek_layout"
-        app:layout_constraintEnd_toEndOf="@+id/player_title"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="@+id/player_title"
+        app:layout_constraintEnd_toEndOf="@+id/titleTV"
+        app:layout_constraintStart_toStartOf="@+id/titleTV"
+        app:layout_constraintTop_toBottomOf="@+id/titleTV"
         tools:text="@tools:sample/first_names" />
 
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/currentTimeTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8pt"
+        android:layout_marginBottom="8dp"
+        android:maxLines="1"
+        android:text="@string/timer"
+        android:textColor="@color/white"
+        app:layout_constraintBottom_toTopOf="@+id/controls_layout"
+        app:layout_constraintStart_toStartOf="parent" />
 
-    <LinearLayout
-        android:id="@+id/seek_layout"
+    <androidx.appcompat.widget.AppCompatSeekBar
+        android:id="@+id/playerSeek"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp"
-        android:orientation="horizontal"
-        android:translationZ="1dp"
-        app:layout_constraintBottom_toTopOf="@+id/controls_layout"
+        android:layout_marginBottom="4dp"
+        android:progressBackgroundTint="@color/white"
+        android:translationZ="5dp"
+        app:layout_constraintBottom_toTopOf="@+id/currentTimeTV"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent" />
 
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/current_time_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_weight="0"
-            android:maxLines="1"
-            android:text="@string/timer"
-            android:textColor="@color/white"
-            app:layout_constraintBottom_toBottomOf="@+id/playerSeek"
-            app:layout_constraintEnd_toStartOf="@+id/playerSeek"
-            app:layout_constraintStart_toStartOf="parent" />
-
-        <androidx.appcompat.widget.AppCompatSeekBar
-            android:id="@+id/playerSeek"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:progressBackgroundTint="@color/white"
-            app:layout_constraintBottom_toTopOf="@+id/controls_layout"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
-
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/timeText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="10dp"
-            android:layout_weight="0"
-            android:maxLines="1"
-            android:text="@string/timer"
-            android:textColor="@color/white"
-            app:layout_constraintBottom_toBottomOf="@+id/playerSeek"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/playerSeek" />
-    </LinearLayout>
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/totalTimeTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="8pt"
+        android:maxLines="1"
+        android:text="@string/timer"
+        android:textColor="@color/white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/playerSeek" />
 
     <LinearLayout
         android:id="@+id/controls_layout"
@@ -121,15 +148,15 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp"
-        android:layout_marginBottom="7dp"
+        android:layout_marginBottom="8dp"
         android:orientation="horizontal"
         android:translationZ="1dp"
-        app:layout_constraintBottom_toTopOf="@+id/PPlaylistLayout"
+        app:layout_constraintBottom_toTopOf="@+id/activator"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
         <androidx.appcompat.widget.AppCompatImageButton
-            android:id="@+id/player_bucle"
+            android:id="@+id/bucleBTN"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -138,7 +165,7 @@
             tools:ignore="TouchTargetSizeCheck,ImageContrastCheck" />
 
         <androidx.appcompat.widget.AppCompatImageButton
-            android:id="@+id/player_prev"
+            android:id="@+id/previousBTN"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="2"
@@ -147,7 +174,7 @@
             tools:ignore="TouchTargetSizeCheck,ImageContrastCheck" />
 
         <androidx.appcompat.widget.AppCompatImageButton
-            android:id="@+id/player_play"
+            android:id="@+id/playBTN"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="2"
@@ -156,7 +183,7 @@
             tools:ignore="TouchTargetSizeCheck,ImageContrastCheck" />
 
         <androidx.appcompat.widget.AppCompatImageButton
-            android:id="@+id/player_next"
+            android:id="@+id/nextBTN"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="2"
@@ -165,7 +192,7 @@
             tools:ignore="TouchTargetSizeCheck,ImageContrastCheck" />
 
         <androidx.appcompat.widget.AppCompatImageButton
-            android:id="@+id/player_shuffle"
+            android:id="@+id/shuffleBTN"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -178,11 +205,36 @@
 
     </LinearLayout>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/PPlaylistLayout"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_PPlaylist"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/rounded_nav_borders"
+        android:background="@color/main"
+        android:paddingBottom="2pt"
+        android:translationZ="5dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="parent" />
+
+    <com.google.android.gms.ads.AdView
+        android:id="@+id/adView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="8dp"
+        android:translationZ="1dp"
+        app:adSize="BANNER"
+        app:adUnitId="ca-app-pub-3940256099942544/6300978111"
+        app:layout_constraintBottom_toTopOf="@+id/favoriteBTN"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/activator"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/main"
         android:translationZ="5dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -221,43 +273,6 @@
             tools:text="1/24" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_PPlaylist"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/main"
-        android:paddingBottom="2pt"
-        android:translationZ="5dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/PPlaylistLayout" />
-
-    <ImageButton
-        android:id="@+id/favoriteButton"
-        android:layout_width="38dp"
-        android:layout_height="38dp"
-        android:layout_marginBottom="25dp"
-        android:background="@android:color/transparent"
-        android:contentDescription="@string/favoriteSong"
-        android:translationZ="1dp"
-        app:layout_constraintBottom_toTopOf="@+id/player_title"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        tools:ignore="ImageContrastCheck,TouchTargetSizeCheck" />
-
-    <com.google.android.gms.ads.AdView
-        android:id="@+id/adView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:translationZ="1dp"
-        app:adSize="BANNER"
-        app:adUnitId="ca-app-pub-3940256099942544/6300978111"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/player_thumbnail" />
 
 
 </androidx.constraintlayout.motion.widget.MotionLayout>
