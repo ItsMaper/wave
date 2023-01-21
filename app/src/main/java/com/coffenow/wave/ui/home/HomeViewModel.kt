@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import com.coffenow.wave.model.DBModel
 import com.coffenow.wave.model.YTModel
 import com.coffenow.wave.network.YTApiConfig
+import com.coffenow.wave.ui.home.HomeFragment.Companion.dataCopy
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -15,13 +16,10 @@ import retrofit2.Response
 class HomeViewModel : ViewModel() {
 
     private val _data = MutableLiveData<DBModel>()
-    val dataLoaded = _data
+    var dataLoaded = _data
     private val _isLoading = MutableLiveData<Boolean>()
-    val isLoading = _isLoading
     private val _isAllDataOnlineLoaded = MutableLiveData<Boolean>()
-    val isAllDataOnlineLoaded = _isAllDataOnlineLoaded
     private val _message = MutableLiveData<String>()
-    val message = _message
     var nextPageToken: String? = null
     var querySearch: String? = null
     var relatedTo: String? = null
@@ -49,7 +47,7 @@ class HomeViewModel : ViewModel() {
                         else { _isAllDataOnlineLoaded.value = true }
                         if (data.items.isNotEmpty()){
                             for (items in data.items){
-                                itemsToParse.add(DBModel.Items(items.videoId.videoID!!, items.snippet.title, items.snippet.channelTitle, items.snippet.thumbnails.high.url))
+                                itemsToParse.add(DBModel.Items(items.videoId.videoID!!, items.snippet.title, items.snippet.channelTitle, items.snippet.thumbnails.high.url, items.snippet.liveBroadcast))
                             }
                             dataLoaded.value?.items.let {
                                 if(it!=null){
@@ -88,13 +86,14 @@ class HomeViewModel : ViewModel() {
                         else { _isAllDataOnlineLoaded.value = true }
                         if (data.items.isNotEmpty()){
                             for (items in data.items){
-                                itemsToParse.add(DBModel.Items(items.videoId.videoID!!, items.snippet.title, items.snippet.channelTitle, items.snippet.thumbnails.high.url))
+                                itemsToParse.add(DBModel.Items(items.videoId.videoID!!, items.snippet.title, items.snippet.channelTitle, items.snippet.thumbnails.high.url, items.snippet.liveBroadcast))
                             }
                             dataLoaded.value?.items.let {
                                 if(it!=null){
                                     itemsToParse.addAll(it)
                                 }
                                 dataLoaded.value = DBModel(itemsToParse)
+                                dataCopy = itemsToParse
                             }
                         }
                     }
@@ -116,7 +115,7 @@ class HomeViewModel : ViewModel() {
             val title = cursor.getString(1)
             val channel = cursor.getString(2)
             val thumb = cursor.getString(3)
-            itemsToParse.add(DBModel.Items(id, title, channel, thumb))
+            itemsToParse.add(DBModel.Items(id, title, channel, thumb, "none"))
             i++
         }
         dataLoaded.value?.items.let {
@@ -124,6 +123,7 @@ class HomeViewModel : ViewModel() {
                 itemsToParse.addAll(it)
             }
             dataLoaded.value = DBModel(itemsToParse)
+            dataCopy = itemsToParse
         }
     }
 
@@ -132,9 +132,6 @@ class HomeViewModel : ViewModel() {
         _data.value = DBModel(itemsToParse)
     }
 
-    fun noRepeat(){
-
-    }
 
     companion object {
         private val TAG = HomeViewModel::class.java.simpleName

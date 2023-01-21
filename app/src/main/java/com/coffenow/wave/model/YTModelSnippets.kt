@@ -12,5 +12,8 @@ data class YTModelSnippets(
     val thumbnails: YTModelThumbnails,
 
     @SerializedName("channelTitle")
-    val channelTitle: String
+    val channelTitle: String,
+
+    @SerializedName("liveBroadcastContent")
+    val liveBroadcast: String
 )

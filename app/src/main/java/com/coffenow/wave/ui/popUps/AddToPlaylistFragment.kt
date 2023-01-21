@@ -12,18 +12,20 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.coffenow.wave.R
 import com.coffenow.wave.adapter.PlaylistsByDB
 import com.coffenow.wave.databinding.FragmentAddToPlaylistBinding
+import com.coffenow.wave.model.DBPlaylistModel
 import com.coffenow.wave.utils.WaveDBHelper
 
-class AddToPlaylist(context: Context) : DialogFragment() {
+class AddToPlaylistFragment(context: Context) : DialogFragment() {
     private var _binding: FragmentAddToPlaylistBinding? = null
     private val binding get() = _binding!!
     private lateinit var dbHelper: WaveDBHelper
     private lateinit var db: SQLiteDatabase
     private var appContext = context
 
+
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        this.dialog?.setTitle(resources.getString(R.string.SelectPlaylist))
         setBind()
         initRecyclerView() }
 
@@ -45,11 +47,34 @@ class AddToPlaylist(context: Context) : DialogFragment() {
         val cursor: Cursor = db.rawQuery(
             "SELECT * FROM playlists",null
         )
-        //dbAdapter.rvSet(appContext, cursor)
+        val items = getData(cursor)
         val manager = LinearLayoutManager(requireContext())
         binding.lvPlaylists.apply {
             layoutManager = manager
             adapter = dbAdapter
         }
+        dbAdapter.rvSet(appContext, true, items)
+    }
+
+    private fun getData(cursor: Cursor): ArrayList<DBPlaylistModel> {
+        val items =ArrayList<DBPlaylistModel>()
+        var i = 0
+        if (cursor.count == 1){
+            cursor.moveToFirst()
+            val title = cursor.getString(0)
+            items.add(DBPlaylistModel(title))
+        } else{
+            if (cursor.count  != 0){
+                while (i < cursor.count-1){
+                    cursor.moveToPosition(i)
+                    val title = cursor.getString(0)
+                    items.add(DBPlaylistModel(title))
+                    i++
+                }
+            }
+        }
+
+
+        return items
     }
 }

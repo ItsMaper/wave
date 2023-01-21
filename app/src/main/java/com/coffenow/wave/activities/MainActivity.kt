@@ -1,6 +1,5 @@
 package com.coffenow.wave.activities
 
-import android.content.Intent
 import android.graphics.drawable.AnimationDrawable
 import android.os.Bundle
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -11,7 +10,6 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.coffenow.wave.R
 import com.coffenow.wave.databinding.ActivityMainBinding
-import com.coffenow.wave.services.OnBackPlayer
 
 class MainActivity : AppCompatActivity() {
 
@@ -24,6 +22,10 @@ class MainActivity : AppCompatActivity() {
         supportActionBar?.hide()
         appBar()
         setBackground()
+    }
+
+    override fun onBackPressed() {
+        finish()
     }
 
     private fun appBar() {

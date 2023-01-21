@@ -7,6 +7,7 @@ data class DBModel(
         val id: String,
         val title:String,
         val channelName: String,
-        val thumb: String
+        val thumb: String,
+        val live: String
     )
 }

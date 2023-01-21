@@ -2,6 +2,8 @@ package com.coffenow.wave.adapter
 
 import android.content.Intent
 import android.view.LayoutInflater
+import android.view.View.INVISIBLE
+import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -35,6 +37,7 @@ class ItemMusicAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                 i.putExtra("title", data.title)
                 i.putExtra("publisher", data.channelName)
                 i.putExtra("thumbnail", data.thumb)
+                i.putExtra("state", data.live)
                 it.context.startActivity(i)
             }
             binding.downloadMusic.setOnClickListener{
@@ -46,6 +49,9 @@ class ItemMusicAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                 .load(data.thumb)
                 .centerCrop()
                 .into(binding.onlineThumbnail)
+            if (data.live != "live"){
+                binding.stateIV.visibility = INVISIBLE
+            }
         }
     }
 

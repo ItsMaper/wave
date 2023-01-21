@@ -1,8 +1,6 @@
 package com.coffenow.wave.ui.home
 
-import android.app.Activity
 import android.content.Context
-import android.content.Context.INPUT_METHOD_SERVICE
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.net.ConnectivityManager
@@ -15,7 +13,6 @@ import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.AbsListView
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -25,8 +22,8 @@ import com.coffenow.wave.R
 import com.coffenow.wave.adapter.CircularAdapter
 import com.coffenow.wave.adapter.ItemMusicAdapter
 import com.coffenow.wave.databinding.FragmentHomeBinding
+import com.coffenow.wave.model.DBModel
 import com.coffenow.wave.utils.WaveDBHelper
-
 
 class HomeFragment : Fragment() {
 
@@ -42,11 +39,18 @@ class HomeFragment : Fragment() {
     private var totalItem = -1
     private var scrollOutItem = -1
 
+    companion object{
+        var dataCopy : ArrayList<DBModel.Items>? = null }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         appContext= requireContext().applicationContext
         dbHelper = WaveDBHelper(appContext)
-        getViewModel()
+        if (dataCopy!=null){
+            viewModel?.dataLoaded?.value = DBModel(dataCopy!!)
+        }else{
+            getViewModel()
+        }
         circleRecyclerView()
         initRecyclerView()
         setSearch()
@@ -74,8 +78,9 @@ class HomeFragment : Fragment() {
     private fun getViewModel(){
         viewModel?.clearAll()
         db = dbHelper.readableDatabase
+        val keyToSearch: Boolean = dbHelper.isFilled("searches")
         val cursor: Cursor = db.rawQuery("SELECT * FROM searches", null)
-        if (cursor.moveToFirst()){
+        if (keyToSearch && cursor.moveToFirst()){
             val rand: Int = (0 until (cursor.count-1)).random()
             cursor.move(rand)
             viewModel?.relatedTo = cursor.getString(0)

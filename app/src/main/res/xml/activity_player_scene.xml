@@ -203,8 +203,8 @@
             android:layout_width="38dp" />
         <Constraint
             android:id="@+id/addToPlaylist_btn"
-            android:layout_width="26dp"
-            android:layout_height="26dp"
+            android:layout_width="38dp"
+            android:layout_height="38dp"
             android:visibility="visible"
             android:translationZ="1dp"
             motion:layout_constraintStart_toEndOf="@+id/favoriteBTN"

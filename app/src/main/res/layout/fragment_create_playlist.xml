@@ -38,6 +38,7 @@
             android:focusableInTouchMode="true"
             android:importantForAutofill="no"
             android:inputType="textPersonName"
+            android:labelFor="@id/textView"
             android:minHeight="48dp"
             android:singleLine="true"
             android:textAlignment="center"

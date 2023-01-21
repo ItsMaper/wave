@@ -47,6 +47,7 @@ class OnBackPlayer : LifecycleService() {
         var playlistService : MutableLiveData<DBModel>?= null
         var currentSoundID = MutableLiveData<String>()
         var currentQueue = MutableLiveData<Int>()
+        var isLive : MutableLiveData<Boolean> = MutableLiveData(false)
         var isPlaying : MutableLiveData<Boolean> = MutableLiveData(false)
         var isShuffled : MutableLiveData<Boolean> = MutableLiveData(false)
         var isBucle : MutableLiveData<Boolean> = MutableLiveData(false)
@@ -74,9 +75,14 @@ class OnBackPlayer : LifecycleService() {
         currentQueue.observeForever { it1 ->
             if (!fromNotifReturn){
                 playlistService?.value?.let {
-                    dbSearchesUpdater(it.items[it1].id,it.items[it1].title,it.items[it1].channelName,it.items[it1].thumb)
+                    isLive.value?.let { live->
+                        if (!live){
+                            dbSearchesUpdater(it.items[it1].id,it.items[it1].title,it.items[it1].channelName,it.items[it1].thumb)
+                        }
+                    }
                     currentTitle = it.items[it1].title
                     currentSoundID.value = it.items[it1].id
+                    isLive.value = it.items[it1].live != "none"
                 } }
              }
 
@@ -130,27 +136,33 @@ class OnBackPlayer : LifecycleService() {
             }
             override fun onCurrentSecond(youTubePlayer: YouTubePlayer, second: Float) {
                 super.onCurrentSecond(youTubePlayer, second)
-                val time = second.toInt()
-                isPlaying.value?.let {
-                    if (it){
-                        currentSecond.value = OnBackPlayerTime(time)
+
+                isLive.value?.let {
+                    if (!it){
+                        val time = second.toInt()
+                        isPlaying.value?.let { isPlay->
+                            if (isPlay){
+                                currentSecond.value = OnBackPlayerTime(time)
+                            }
+                        }
+                        if(currentSecond.value!!.time == duration.value!!.time - 1){
+                            isShuffled.value?.let {it1->
+                                if (it1){
+                                    val rand: Int = (0 until (PlayerPlaylistAdapter.itemsSize.value!!-1)).random()
+                                    currentQueue.value = rand
+                                }else{
+                                    currentQueue.value = currentQueue.value?.plus(1)
+                                } } }
                     }
                 }
-                if(currentSecond.value!!.time == duration.value!!.time - 1){
-                    isShuffled.value?.let {
-                        if (it){
-                            val rand: Int = (0 until (PlayerPlaylistAdapter.itemsSize.value!!-1)).random()
-                            currentQueue.value = rand
-                        }else{
-                            currentQueue.value = currentQueue.value?.plus(1)
-                        }
-                    }
-
-                } }
+            }
             override fun onVideoDuration(youTubePlayer: YouTubePlayer, duration: Float) {
                 super.onVideoDuration(youTubePlayer, duration)
-                val time = duration.toInt()
-                PlayerActivity.duration.value = OnBackPlayerTime(time) }
+                isLive.value?.let {
+                    if (!it){
+                        val time = duration.toInt()
+                        PlayerActivity.duration.value = OnBackPlayerTime(time) }}
+            }
 
             override fun onError(youTubePlayer: YouTubePlayer, error: PlayerConstants.PlayerError) {
                 super.onError(youTubePlayer, error)

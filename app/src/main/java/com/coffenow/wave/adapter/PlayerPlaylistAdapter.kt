@@ -1,6 +1,7 @@
 package com.coffenow.wave.adapter
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import androidx.lifecycle.MutableLiveData
@@ -56,6 +57,9 @@ class PlayerPlaylistAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                 .load(data.thumb)
                 .centerCrop()
                 .into(binding.ppThumbnail)
+            if (data.live != "live"){
+                binding.stateIV.visibility = View.INVISIBLE
+            }
         }
     }
     fun setDataDiff(newList: List<DBModel.Items>, rv: RecyclerView){

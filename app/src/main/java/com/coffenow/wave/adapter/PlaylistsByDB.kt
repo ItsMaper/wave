@@ -5,6 +5,7 @@ import android.content.Intent
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.view.LayoutInflater
+import android.view.View.GONE
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
@@ -17,10 +18,12 @@ import com.coffenow.wave.model.DBPlaylistModel
 class PlaylistsByDB : RecyclerView.Adapter<RecyclerView.ViewHolder>(){
     lateinit var context: Context
     private var items = ArrayList<DBPlaylistModel>()
+    private var toAdd : Boolean = false
 
-    fun rvSet(context: Context, data: ArrayList<DBPlaylistModel>){
+    fun rvSet(context: Context, toAdd: Boolean, data: ArrayList<DBPlaylistModel>){
         this.context=context
         this.items=data
+        this.toAdd = toAdd
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -47,10 +50,12 @@ class PlaylistsByDB : RecyclerView.Adapter<RecyclerView.ViewHolder>(){
                     Toast.makeText(context, "You need add items to load", Toast.LENGTH_SHORT).show()
                 }
             }
-
             binding.playlistTitle.text= data.title.replaceFirstChar{data.title[0].titlecase()}
             binding.playlistCount.text = "%s Waves".format(getPlaylistCount(data.title))
             binding.playlistThumbnail.setImageResource(R.drawable.ic_baseline_wave_list)
+            if (!toAdd){
+                binding.addToBTN.visibility = GONE
+            }
         }
 
         private fun getPlaylistCount(title: String) : Int {

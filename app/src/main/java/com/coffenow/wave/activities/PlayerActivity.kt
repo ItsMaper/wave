@@ -11,6 +11,8 @@ import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.AttributeSet
 import android.view.View
+import android.view.View.INVISIBLE
+import android.view.View.VISIBLE
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.graphics.drawable.toBitmap
@@ -34,6 +36,7 @@ import com.coffenow.wave.services.OnBackPlayer
 import com.coffenow.wave.services.OnBackPlayer.Companion.currentQueue
 import com.coffenow.wave.services.OnBackPlayer.Companion.fromNotifReturn
 import com.coffenow.wave.services.OnBackPlayer.Companion.isBucle
+import com.coffenow.wave.services.OnBackPlayer.Companion.isLive
 import com.coffenow.wave.services.OnBackPlayer.Companion.isPlaying
 import com.coffenow.wave.services.OnBackPlayer.Companion.isShuffled
 import com.coffenow.wave.services.OnBackPlayer.Companion.playControl
@@ -77,6 +80,7 @@ class PlayerActivity : AppCompatActivity() {
     private var firstName :String? = null
     private var firstPublisher:String? = null
     private var firstThumbnail:String? = null
+    private var firstState: String? = null
     private var isScroll = false
     private var currentItem = -1
     private var totalItem = -1
@@ -111,6 +115,7 @@ class PlayerActivity : AppCompatActivity() {
         viewModel = ViewModelProvider(this)[PlayerViewModel::class.java]
         return super.onCreateView(name, context, attrs)
     }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -166,15 +171,16 @@ class PlayerActivity : AppCompatActivity() {
         firstName = intent.getStringExtra("title")
         firstPublisher = intent.getStringExtra("publisher")
         firstThumbnail = intent.getStringExtra("thumbnail")
+        firstState = intent.getStringExtra("state")
         playlistName = intent.getStringExtra("playlist")
         playlistFromQuery = intent.getStringExtra("query")
         setWebSeekBar()
     }
 
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
-        super.onBackPressed()
+    private fun onBackPressedC() {
         val intent = Intent(this, MainActivity::class.java)
+        intent.addCategory(Intent.CATEGORY_HOME)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
         startActivity(intent)
         finish()
     }
@@ -188,12 +194,16 @@ class PlayerActivity : AppCompatActivity() {
                 favoriteSetter()
             } else{
                 playlistService?.observe(this) {
-                    val data = ContentValues()
-                    data.put("videoID", it.items[pos].id)
-                    data.put("title", it.items[pos].title)
-                    data.put("publisher", it.items[pos].channelName)
-                    data.put("thumbnail", it.items[pos].thumb)
-                    db.insert("favorites",null, data)
+                    if (it.items[pos].live != "live"){
+                        val data = ContentValues()
+                        data.put("videoID", it.items[pos].id)
+                        data.put("title", it.items[pos].title)
+                        data.put("publisher", it.items[pos].channelName)
+                        data.put("thumbnail", it.items[pos].thumb)
+                        db.insert("favorites",null, data)
+                    } else{
+                        Toast.makeText(this,"You cannot save live videos", Toast.LENGTH_SHORT)
+                    }
             }
                 favoriteSetter()
         }}
@@ -213,10 +223,12 @@ class PlayerActivity : AppCompatActivity() {
             isBucle.value = isBucle.value != true
         }
         addToBtn.setOnClickListener {
-            val fragment : androidx.fragment.app.DialogFragment = com.coffenow.wave.ui.popUps.AddToPlaylist(this)
+            val fragment : androidx.fragment.app.DialogFragment = com.coffenow.wave.ui.popUps.AddToPlaylistFragment(this)
             fragment.show(supportFragmentManager, "Select")
         }
-
+        binding.IbackBTN.setOnClickListener {
+            onBackPressedC()
+        }
     }
         private fun setVibrantPalette(paletteGlide: Palette){
             val swatchDarkVibrant = paletteGlide.darkVibrantSwatch
@@ -243,19 +255,33 @@ class PlayerActivity : AppCompatActivity() {
                 bucleBtn.alpha = 0.70f } }
 
         duration.observe(this){
-            if(it.time == 0){
-                currentTime.text = resources.getText(R.string.timer)
-                timeTotal.text = resources.getText(R.string.timer)}else{
-                seekBar.max =it.time
-                timeTotal.text = formatTime(it.time) } }
+            isLive.value?.let { live->
+                if (!live){
+                    if(it.time == 0){
+                        currentTime.visibility = VISIBLE
+                        currentTime.text = resources.getText(R.string.timer)
+                        timeTotal.text = resources.getText(R.string.timer)}else{
+                        seekBar.max =it.time
+                        timeTotal.text = formatTime(it.time) }
+                } else{
+                    timeTotal.text = "Live"
+                    seekBar.progress = seekBar.max
+                }
+            } }
 
         currentSecond.observe(this){
-            if(it.time == 0){
-                currentTime.text = resources.getText(R.string.timer)
-                timeTotal.text = resources.getText(R.string.timer)
-                seekBar.progress = 0 }else{
-            seekBar.progress = it.time
-            currentTime.text = formatTime(it.time)} }
+            isLive.value?.let {live->
+                if (!live){
+                    if(it.time == 0){
+                        currentTime.text = resources.getText(R.string.timer)
+                        timeTotal.text = resources.getText(R.string.timer)
+                        seekBar.progress = 0 }else{
+                        seekBar.progress = it.time
+                        currentTime.text = formatTime(it.time)}
+                } else{
+                    currentTime.visibility = INVISIBLE
+                }
+            } }
 
         currentQueue.observe(this){
             playlistService?.observe(this) { data ->
@@ -273,15 +299,13 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private fun getViewModel(fromPlaylist: Boolean){
-        duration.value = OnBackPlayerTime(0)
-        currentSecond.value = OnBackPlayerTime(0)
         seekBar.progress = 0
         db = dbHelper.readableDatabase
 
         if (fromPlaylist){
             if (playlistName == "default"){
                 viewModel?.first = true
-                viewModel?.firsItem = DBModel.Items(firstID!!,firstName!!,firstPublisher!!,firstThumbnail!!)
+                viewModel?.firsItem = DBModel.Items(firstID!!,firstName!!,firstPublisher!!,firstThumbnail!!, firstState!!)
                 viewModel?.relatedTo = firstID
                 viewModel?.getApiData() }else{
                 viewModel?.first = false
@@ -433,6 +457,13 @@ class PlayerActivity : AppCompatActivity() {
                     "$hours:$minutes:$seconds"
                 }}
         }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        playlistService?.removeObservers(this)
+        currentQueue.removeObservers(this)
+        currentSecond.removeObservers(this)
     }
 }
 

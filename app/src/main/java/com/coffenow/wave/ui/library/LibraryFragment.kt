@@ -55,7 +55,7 @@ class LibraryFragment : Fragment() {
         val cursor: Cursor = db.rawQuery(
             "SELECT * FROM playlists",null)
         viewModel?.parseDBData(cursor)
-        dbAdapter.rvSet(appContext, viewModel!!.dataLoaded)
+        dbAdapter.rvSet(appContext,false, viewModel!!.dataLoaded)
         val manager = LinearLayoutManager(requireContext())
         binding.rvPlaylist.apply {
             layoutManager = manager

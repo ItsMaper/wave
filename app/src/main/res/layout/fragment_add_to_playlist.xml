@@ -4,23 +4,20 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:drawable/screen_background_dark_transparent"
-    tools:context=".ui.popUps.AddToPlaylist">
+    android:background="@color/transparent"
+    tools:context=".ui.popUps.AddToPlaylistFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center_horizontal"
-        android:layout_marginLeft="16dp"
-        android:layout_marginTop="65dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginBottom="65dp"
-        android:background="@drawable/rounded_frame">
+        android:background="@drawable/rounded_frame"
+        >
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/lv_playlists"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
+            android:layout_height="match_parent"
             android:layout_marginBottom="75dp"
             android:background="@color/sub"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -33,10 +30,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="24dp"
-            android:layout_marginBottom="16dp"
+            android:layout_marginTop="12dp"
             android:background="@color/sub"
             android:text="@string/createBtn"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/lv_playlists" />
 
@@ -44,11 +40,10 @@
             android:id="@+id/addBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
             android:layout_marginEnd="24dp"
-            android:layout_marginBottom="16dp"
             android:background="@color/sub"
             android:text="@string/addToPlaylist"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/lv_playlists" />
 

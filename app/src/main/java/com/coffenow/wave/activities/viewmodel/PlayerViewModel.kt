@@ -28,7 +28,6 @@ class PlayerViewModel : ViewModel() {
     val isAllDataOnlineLoaded = _isAllDataOnlineLoaded
     private val _playList = MutableLiveData<DBModel>()
     var playlistData = _playList
-
     var first : Boolean = true
 
     fun getApiData(){
@@ -55,7 +54,7 @@ class PlayerViewModel : ViewModel() {
                                 itemsToParse.add(firsItem)
                             }
                             for (items in data.items){
-                                val thisItems = DBModel.Items(items.videoId.videoID!!, items.snippet.title, items.snippet.channelTitle, items.snippet.thumbnails.high.url)
+                                val thisItems = DBModel.Items(items.videoId.videoID!!, items.snippet.title, items.snippet.channelTitle, items.snippet.thumbnails.high.url,items.snippet.liveBroadcast)
                                 itemsToParse.add(thisItems)
                             }
                             playlistData.value?.items.let {
@@ -97,7 +96,7 @@ class PlayerViewModel : ViewModel() {
                         else { _isAllDataOnlineLoaded.value = true }
                         if (data.items.isNotEmpty()){
                             for (items in data.items){
-                                itemsToParse.add(DBModel.Items(items.videoId.videoID!!, items.snippet.title, items.snippet.channelTitle, items.snippet.thumbnails.high.url))
+                                itemsToParse.add(DBModel.Items(items.videoId.videoID!!, items.snippet.title, items.snippet.channelTitle, items.snippet.thumbnails.high.url,items.snippet.liveBroadcast))
                             }
                             playlistData.value?.items.let {
                                 if(it!=null){
@@ -124,7 +123,7 @@ class PlayerViewModel : ViewModel() {
             val title = cursor.getString(1)
             val channel = cursor.getString(2)
             val thumb = cursor.getString(3)
-            itemsToParse.add(DBModel.Items(id, title, channel, thumb))
+            itemsToParse.add(DBModel.Items(id, title, channel, thumb, "none"))
             i++
         }
         _playList.value?.items.let {

@@ -14,13 +14,17 @@ class LibraryViewModel : ViewModel() {
             cursor.moveToFirst()
             val title = cursor.getString(0)
             dataLoaded.add(DBPlaylistModel(title))
+        }else{
+            if (cursor.count != 0){
+                while (i < cursor.count-1){
+                    cursor.moveToPosition(i)
+                    val title = cursor.getString(0)
+                    dataLoaded.add(DBPlaylistModel(title))
+                    i++
+                }
+            }
         }
-        while (i < cursor.count-1){
-            cursor.moveToPosition(i)
-            val title = cursor.getString(0)
-            dataLoaded.add(DBPlaylistModel(title))
-            i++
-        }
+
     }
 
     fun clearAll(){

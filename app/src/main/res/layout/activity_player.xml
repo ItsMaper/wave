@@ -9,6 +9,16 @@
     tools:context=".activities.PlayerActivity"
     android:id="@+id/player_container">
 
+    <ImageView
+        android:id="@+id/IbackBTN"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="5dp"
+        android:background="@drawable/icon_back"
+        app:layout_constraintBottom_toBottomOf="@+id/playerPlaylistTitle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/playerPlaylistTitle" />
+
     <TextView
         android:id="@+id/playerPlaylistTitle"
         android:layout_width="wrap_content"
@@ -26,8 +36,8 @@
 
     <ImageButton
         android:id="@+id/addToPlaylist_btn"
-        android:layout_width="38dp"
-        android:layout_height="38dp"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:layout_marginEnd="8dp"
         android:background="@color/transparent"
         android:contentDescription="@string/save"
@@ -37,7 +47,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/imageFrame"
         app:layout_constraintTop_toTopOf="@+id/imageFrame"
-        tools:ignore="TouchTargetSizeCheck" />
+        tools:ignore="ImageContrastCheck,TouchTargetSizeCheck" />
 
 
     <ImageButton
@@ -149,6 +159,7 @@
         android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp"
         android:layout_marginBottom="8dp"
+        android:gravity="center"
         android:orientation="horizontal"
         android:translationZ="1dp"
         app:layout_constraintBottom_toTopOf="@+id/activator"
