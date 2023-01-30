@@ -266,6 +266,7 @@ class PlayerActivity : AppCompatActivity() {
                 } else{
                     timeTotal.text = "Live"
                     seekBar.progress = seekBar.max
+                    currentTime.visibility = INVISIBLE
                 }
             } }
 

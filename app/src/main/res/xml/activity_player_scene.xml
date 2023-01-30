@@ -222,11 +222,12 @@
         <Constraint
             motion:layout_constraintEnd_toEndOf="parent"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
             motion:layout_constraintTop_toBottomOf="@+id/activator"
             android:translationZ="5dp"
             motion:layout_constraintStart_toStartOf="parent"
-            android:id="@+id/rv_PPlaylist" />
+            android:id="@+id/rv_PPlaylist"
+            motion:layout_constraintBottom_toBottomOf="parent" />
         <Constraint
             android:layout_height="wrap_content"
             motion:layout_constraintStart_toStartOf="parent"

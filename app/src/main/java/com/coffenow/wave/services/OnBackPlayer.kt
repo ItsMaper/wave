@@ -234,4 +234,9 @@ class OnBackPlayer : LifecycleService() {
             dbHelper.addData("searches", data)
         }
     }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        playerView.release()
+    }
 }
